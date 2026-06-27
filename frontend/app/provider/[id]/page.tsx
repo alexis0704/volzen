@@ -1,7 +1,10 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
-import { mockProviders, VN_DONG_FORMAT, AMENITIES_ICONS } from "@/lib/mock-data";
+import { VN_DONG_FORMAT, AMENITIES_ICONS } from "@/lib/domain";
+import type { Provider } from "@/lib/domain";
 import { Star, MapPin, ArrowLeft, Wifi, Coffee, Wind, Bath, ParkingSquare, Home, Shield, Cookie, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getProvider } from "@/lib/api";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Wifi, Coffee, Wind, Bath, ParkingSquare, Home, Shield, Cookie,
@@ -10,7 +13,35 @@ const ICON_MAP: Record<string, React.ElementType> = {
 export default function ProviderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const p = mockProviders.find((x) => x.id === id);
+  const [provider, setProvider] = useState<Provider | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let ignore = false;
+
+    getProvider(id)
+      .then((data) => {
+        if (!ignore) setProvider(data);
+      })
+      .catch(() => {
+        if (!ignore) setProvider(null);
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [id]);
+
+  const p = provider;
+
+  if (loading) return (
+    <div className="min-h-dvh flex items-center justify-center" style={{ background: "var(--bg)", color: "var(--text)" }}>
+      Loading provider…
+    </div>
+  );
 
   if (!p) return (
     <div className="min-h-dvh flex items-center justify-center" style={{ background: "var(--bg)", color: "var(--text)" }}>

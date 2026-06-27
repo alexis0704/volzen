@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Zap, Car, Plus, Trash2, Check } from "lucide-react";
-import type { ConnectorType, Vehicle } from "@/lib/mock-data";
+import type { ConnectorType, Vehicle } from "@/lib/domain";
+import { createVehicle } from "@/lib/api";
 
 const CONNECTORS: ConnectorType[] = ["Type 1", "Type 2", "CCS", "CHAdeMO"];
 const BRANDS = ["VinFast", "Tesla", "Toyota", "Honda", "Hyundai", "Kia", "BMW", "Mercedes", "Audi", "BYD", "Other"];
@@ -16,6 +17,8 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(0);
   const [vehicles, setVehicles] = useState<Omit<Vehicle, "id">[]>([newVehicle()]);
   const [defaultIdx, setDefaultIdx] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const steps = ["Add vehicle", "More vehicles", "Default vehicle"];
 
@@ -23,8 +26,28 @@ export default function OnboardingPage() {
     setVehicles((vs) => vs.map((v, idx) => (idx === i ? { ...v, ...patch } : v)));
   }
 
-  function finish() {
-    // ponytail: just redirect — real app would persist
+  async function finish() {
+    setSaving(true);
+    setError("");
+
+    try {
+      await Promise.all(
+        vehicles
+          .filter((vehicle) => vehicle.model.trim().length > 0)
+          .map((vehicle, index) =>
+            createVehicle({
+              brand: vehicle.brand,
+              model: vehicle.model,
+              year: vehicle.year,
+              connectorType: vehicle.connector,
+              isDefault: index === defaultIdx,
+            }),
+          ),
+      );
+    } catch (exception) {
+      setError(exception instanceof Error ? exception.message : "Could not save vehicles. Continuing in demo mode.");
+    }
+
     router.push("/explore");
   }
 
@@ -81,8 +104,8 @@ export default function OnboardingPage() {
               )}
               <div className="flex gap-3">
                 <button onClick={() => setStep(0)} className="flex-1 py-3 rounded-xl text-sm font-medium" style={{ border: "1px solid rgba(74,222,128,0.3)", color: "var(--text-muted)" }}>Back</button>
-                <button onClick={() => (vehicles.length > 1 ? setStep(2) : finish())} className="flex-1 py-3 rounded-xl font-semibold text-sm hover:opacity-90" style={{ background: "var(--accent)", color: "#0a0f0d" }}>
-                  {vehicles.length > 1 ? "Continue" : "Done"}
+                <button onClick={() => (vehicles.length > 1 ? setStep(2) : finish())} disabled={saving} className="flex-1 py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-60" style={{ background: "var(--accent)", color: "#0a0f0d" }}>
+                  {saving ? "Saving…" : vehicles.length > 1 ? "Continue" : "Done"}
                 </button>
               </div>
             </div>
@@ -104,10 +127,14 @@ export default function OnboardingPage() {
               </div>
               <div className="flex gap-3">
                 <button onClick={() => setStep(1)} className="flex-1 py-3 rounded-xl text-sm font-medium" style={{ border: "1px solid rgba(74,222,128,0.3)", color: "var(--text-muted)" }}>Back</button>
-                <button onClick={finish} className="flex-1 py-3 rounded-xl font-semibold text-sm hover:opacity-90" style={{ background: "var(--accent)", color: "#0a0f0d" }}>Find chargers</button>
+                <button onClick={finish} disabled={saving} className="flex-1 py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-60" style={{ background: "var(--accent)", color: "#0a0f0d" }}>
+                  {saving ? "Saving…" : "Find chargers"}
+                </button>
               </div>
             </div>
           )}
+
+          {error && <p className="mt-4 text-xs" style={{ color: "#fca5a5" }}>{error}</p>}
         </div>
       </div>
     </div>

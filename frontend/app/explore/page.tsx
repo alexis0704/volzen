@@ -1,15 +1,53 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { MapPin, Zap, Star, ChevronRight, Navigation } from "lucide-react";
-import { mockProviders, VN_DONG_FORMAT } from "@/lib/mock-data";
-import type { Provider } from "@/lib/mock-data";
+import { VN_DONG_FORMAT } from "@/lib/domain";
+import type { Provider } from "@/lib/domain";
+import { searchProviders } from "@/lib/api";
+import { DEFAULT_LOCATION, getCurrentLocation } from "@/lib/location";
+import type { Coordinates } from "@/lib/location";
 
 const LeafletMap = dynamic(() => import("@/components/map/LeafletMap"), { ssr: false, loading: () => <div className="w-full h-full flex items-center justify-center" style={{ background: "var(--bg)", color: "var(--accent)" }}>Loading map…</div> });
 
 export default function ExplorePage() {
   const [selected, setSelected] = useState<string | null>(null);
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [source, setSource] = useState<"api" | "empty" | "error">("empty");
+  const [currentLocation, setCurrentLocation] = useState<Coordinates>(DEFAULT_LOCATION);
+  const [usingGps, setUsingGps] = useState(false);
+
+  useEffect(() => {
+    let ignore = false;
+
+    getCurrentLocation()
+      .catch(() => DEFAULT_LOCATION)
+      .then((location) => {
+        if (ignore) return Promise.reject(new Error("Location request ignored."));
+        setCurrentLocation(location);
+        setUsingGps(location !== DEFAULT_LOCATION);
+        return searchProviders(location);
+      })
+      .then((data) => {
+        if (ignore) return;
+        setProviders(data);
+        setSource(data.length > 0 ? "api" : "empty");
+      })
+      .catch(() => {
+        if (ignore) return;
+        setProviders([]);
+        setSource("error");
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   return (
     <div style={{ background: "var(--bg)", height: "100dvh", display: "flex", flexDirection: "column" }}>
@@ -21,7 +59,7 @@ export default function ExplorePage() {
         </Link>
         <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(74,222,128,0.12)", color: "var(--accent)" }}>Driver</span>
         <div className="ml-auto flex items-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
-          <Navigation size={13} /> Ho Chi Minh City
+          <Navigation size={13} /> {usingGps ? "Current location" : "Ho Chi Minh City"}
         </div>
       </nav>
 
@@ -29,17 +67,17 @@ export default function ExplorePage() {
       <div className="flex flex-1 overflow-hidden">
         {/* Map — 60% on lg, full on mobile */}
         <div className="relative flex-1 lg:flex-[6]">
-          <LeafletMap providers={mockProviders} selected={selected} onSelect={setSelected} />
+          <LeafletMap providers={providers} selected={selected} onSelect={setSelected} currentLocation={currentLocation} />
         </div>
 
         {/* Provider list — 40% on lg, bottom sheet on mobile */}
         <aside className="hidden lg:flex lg:flex-[4] flex-col overflow-y-auto" style={{ borderLeft: "1px solid var(--glass-border)", background: "var(--bg)" }}>
           <div className="px-4 py-4 shrink-0">
-            <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>{mockProviders.length} stations nearby</p>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>Sorted by distance</p>
+            <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>{providers.length} stations nearby</p>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>{loading ? "Loading stations…" : source === "api" ? "Live API · sorted by distance" : source === "empty" ? "No stations found near you" : "Backend unavailable"}</p>
           </div>
           <div className="flex flex-col gap-3 px-4 pb-6">
-            {mockProviders.map((p) => (
+            {providers.map((p) => (
               <ProviderCard key={p.id} provider={p} active={selected === p.id} onSelect={() => setSelected(p.id)} />
             ))}
           </div>
@@ -49,7 +87,7 @@ export default function ExplorePage() {
       {/* Mobile bottom sheet */}
       <div className="lg:hidden shrink-0 overflow-x-auto" style={{ borderTop: "1px solid var(--glass-border)", background: "var(--bg)" }}>
         <div className="flex gap-3 px-4 py-4" style={{ minWidth: "max-content" }}>
-          {mockProviders.map((p) => (
+          {providers.map((p) => (
             <ProviderCardMini key={p.id} provider={p} active={selected === p.id} onSelect={() => setSelected(p.id)} />
           ))}
         </div>

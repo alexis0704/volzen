@@ -5,6 +5,7 @@ import "leaflet/dist/leaflet.css";
 interface Props {
   origin: [number, number];
   destination: [number, number];
+  onRouteInfo?: (info: { distanceKm: number; durationMinutes: number; source: "route" | "fallback" }) => void;
 }
 
 type LeafletContainer = HTMLDivElement & {
@@ -17,7 +18,7 @@ function resetLeafletContainer(container: LeafletContainer) {
   delete container._leaflet_id;
 }
 
-export default function RouteMap({ origin, destination }: Props) {
+export default function RouteMap({ origin, destination, onRouteInfo }: Props) {
   const ref = useRef<LeafletContainer>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
 
@@ -55,13 +56,44 @@ export default function RouteMap({ origin, destination }: Props) {
 
       L.control.zoom({ position: "bottomright" }).addTo(map);
 
-      // Route polyline (mocked straight line)
-      L.polyline([origin, destination], {
-        color: "#4ade80",
-        weight: 4,
-        opacity: 0.85,
-        dashArray: "8 6",
-      }).addTo(map);
+      const drawFallbackRoute = () => {
+        const fallbackLine = L.polyline([origin, destination], {
+          color: "#4ade80",
+          weight: 4,
+          opacity: 0.85,
+          dashArray: "8 6",
+        }).addTo(map);
+        map.fitBounds(fallbackLine.getBounds(), { padding: [48, 48] });
+        onRouteInfo?.({
+          distanceKm: haversineKm(origin, destination),
+          durationMinutes: Math.max(1, Math.round((haversineKm(origin, destination) / 25) * 60)),
+          source: "fallback",
+        });
+      };
+
+      fetchRoute(origin, destination)
+        .then((route) => {
+          if (disposed) return;
+          if (!route) {
+            drawFallbackRoute();
+            return;
+          }
+
+          const line = L.polyline(route.coordinates, {
+            color: "#4ade80",
+            weight: 5,
+            opacity: 0.9,
+          }).addTo(map);
+          map.fitBounds(line.getBounds(), { padding: [48, 48] });
+          onRouteInfo?.({
+            distanceKm: route.distanceKm,
+            durationMinutes: route.durationMinutes,
+            source: "route",
+          });
+        })
+        .catch(() => {
+          if (!disposed) drawFallbackRoute();
+        });
 
       // Origin pin (blue)
       const originIcon = L.divIcon({
@@ -94,8 +126,49 @@ export default function RouteMap({ origin, destination }: Props) {
       mapRef.current = null;
       resetLeafletContainer(container);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [origin, destination, onRouteInfo]);
 
   return <div ref={ref} style={{ width: "100%", height: "100%" }} />;
+}
+
+async function fetchRoute(origin: [number, number], destination: [number, number]) {
+  const url = new URL(`https://router.project-osrm.org/route/v1/driving/${origin[1]},${origin[0]};${destination[1]},${destination[0]}`);
+  url.searchParams.set("overview", "full");
+  url.searchParams.set("geometries", "geojson");
+  url.searchParams.set("steps", "false");
+
+  const response = await fetch(url);
+  if (!response.ok) return null;
+
+  const data = await response.json() as {
+    routes?: Array<{
+      distance: number;
+      duration: number;
+      geometry: {
+        coordinates: Array<[number, number]>;
+      };
+    }>;
+  };
+  const route = data.routes?.[0];
+  if (!route) return null;
+
+  return {
+    coordinates: route.geometry.coordinates.map(([lng, lat]) => [lat, lng] as [number, number]),
+    distanceKm: route.distance / 1000,
+    durationMinutes: Math.max(1, Math.round(route.duration / 60)),
+  };
+}
+
+function haversineKm(origin: [number, number], destination: [number, number]) {
+  const earthRadiusKm = 6371;
+  const dLat = toRadians(destination[0] - origin[0]);
+  const dLng = toRadians(destination[1] - origin[1]);
+  const lat1 = toRadians(origin[0]);
+  const lat2 = toRadians(destination[0]);
+  const a = Math.sin(dLat / 2) ** 2 + Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
+  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function toRadians(value: number) {
+  return (value * Math.PI) / 180;
 }

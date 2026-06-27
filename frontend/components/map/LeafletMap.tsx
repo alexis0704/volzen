@@ -1,12 +1,15 @@
 "use client";
-import { useEffect, useRef } from "react";
-import type { Provider } from "@/lib/mock-data";
+import { useEffect, useRef, useState } from "react";
+import type { Provider } from "@/lib/domain";
+import { DEFAULT_LOCATION } from "@/lib/location";
+import type { Coordinates } from "@/lib/location";
 import "leaflet/dist/leaflet.css";
 
 interface Props {
   providers: Provider[];
   selected: string | null;
   onSelect: (id: string) => void;
+  currentLocation?: Coordinates;
 }
 
 type LeafletContainer = HTMLDivElement & {
@@ -19,10 +22,12 @@ function resetLeafletContainer(container: LeafletContainer) {
   delete container._leaflet_id;
 }
 
-export default function LeafletMap({ providers, selected, onSelect }: Props) {
+export default function LeafletMap({ providers, selected, onSelect, currentLocation = DEFAULT_LOCATION }: Props) {
   const containerRef = useRef<LeafletContainer>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
   const markersRef = useRef<Map<string, import("leaflet").Marker>>(new Map());
+  const currentMarkerRef = useRef<import("leaflet").Marker | null>(null);
+  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -41,7 +46,7 @@ export default function LeafletMap({ providers, selected, onSelect }: Props) {
       // Fix default icon path (webpack mangles it)
       // ponytail: custom green marker via DivIcon instead of default png
       const map = L.map(container, {
-        center: [10.775, 106.698],
+        center: [currentLocation.lat, currentLocation.lng],
         zoom: 14,
         zoomControl: false,
       });
@@ -64,6 +69,35 @@ export default function LeafletMap({ providers, selected, onSelect }: Props) {
       }).addTo(map);
 
       L.control.zoom({ position: "bottomright" }).addTo(map);
+
+      mapRef.current = map;
+      setMapReady(true);
+    });
+
+    return () => {
+      disposed = true;
+      markers.clear();
+      currentMarkerRef.current = null;
+      mapRef.current?.remove();
+      mapRef.current = null;
+      setMapReady(false);
+      resetLeafletContainer(container);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!mapReady || !mapRef.current) return;
+
+    let disposed = false;
+    const markers = markersRef.current;
+    const map = mapRef.current;
+
+    import("leaflet").then((L) => {
+      if (disposed) return;
+
+      markers.forEach((marker) => marker.remove());
+      markers.clear();
 
       providers.forEach((p) => {
         const icon = L.divIcon({
@@ -88,19 +122,44 @@ export default function LeafletMap({ providers, selected, onSelect }: Props) {
           .on("click", () => onSelect(p.id));
         markers.set(p.id, marker);
       });
-
-      mapRef.current = map;
     });
 
     return () => {
       disposed = true;
-      markers.clear();
-      mapRef.current?.remove();
-      mapRef.current = null;
-      resetLeafletContainer(container);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [providers, onSelect, mapReady]);
+
+  useEffect(() => {
+    if (!mapReady || !mapRef.current) return;
+
+    let disposed = false;
+    const map = mapRef.current;
+
+    import("leaflet").then((L) => {
+      if (disposed) return;
+
+      const nextLatLng: [number, number] = [currentLocation.lat, currentLocation.lng];
+      if (currentMarkerRef.current) {
+        currentMarkerRef.current.setLatLng(nextLatLng);
+      } else {
+        const currentIcon = L.divIcon({
+          className: "",
+          html: `<div style="width:18px;height:18px;background:#38bdf8;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 5px rgba(56,189,248,0.25)"></div>`,
+          iconSize: [18, 18],
+          iconAnchor: [9, 9],
+        });
+        currentMarkerRef.current = L.marker(nextLatLng, { icon: currentIcon }).addTo(map);
+      }
+
+      if (!selected) {
+        map.flyTo(nextLatLng, 14, { duration: 0.6 });
+      }
+    });
+
+    return () => {
+      disposed = true;
+    };
+  }, [currentLocation, selected, mapReady]);
 
   // Pan to selected
   useEffect(() => {
