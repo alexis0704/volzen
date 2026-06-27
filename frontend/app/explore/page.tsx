@@ -6,7 +6,7 @@ import { MapPin, Zap, Star, ChevronRight, Navigation } from "lucide-react";
 import { mockProviders, VN_DONG_FORMAT } from "@/lib/mock-data";
 import type { Provider } from "@/lib/mock-data";
 
-const LeafletMap = dynamic(() => import("@/components/map/LeafletMap"), { ssr: false, loading: () => <div className="w-full h-full flex items-center justify-center" style={{ background: "#0a0f0d", color: "#4ade80" }}>Loading map…</div> });
+const LeafletMap = dynamic(() => import("@/components/map/LeafletMap"), { ssr: false, loading: () => <div className="w-full h-full flex items-center justify-center" style={{ background: "var(--bg)", color: "var(--accent)" }}>Loading map…</div> });
 
 export default function ExplorePage() {
   const [selected, setSelected] = useState<string | null>(null);
@@ -14,7 +14,7 @@ export default function ExplorePage() {
   return (
     <div style={{ background: "var(--bg)", height: "100dvh", display: "flex", flexDirection: "column" }}>
       {/* Top bar */}
-      <nav className="flex items-center gap-3 px-4 py-3 shrink-0" style={{ borderBottom: "1px solid rgba(74,222,128,0.12)", background: "rgba(10,15,13,0.9)", backdropFilter: "blur(12px)" }}>
+      <nav className="flex items-center gap-3 px-4 py-3 shrink-0" style={{ borderBottom: "1px solid var(--glass-border)", background: "var(--glass-bg)", backdropFilter: "blur(12px)" }}>
         <Link href="/" className="flex items-center gap-1.5">
           <Zap size={18} style={{ color: "var(--accent)" }} fill="currentColor" />
           <span className="font-bold" style={{ color: "var(--text)" }}>Volzen</span>
@@ -33,7 +33,7 @@ export default function ExplorePage() {
         </div>
 
         {/* Provider list — 40% on lg, bottom sheet on mobile */}
-        <aside className="hidden lg:flex lg:flex-[4] flex-col overflow-y-auto" style={{ borderLeft: "1px solid rgba(74,222,128,0.12)", background: "rgba(10,15,13,0.97)" }}>
+        <aside className="hidden lg:flex lg:flex-[4] flex-col overflow-y-auto" style={{ borderLeft: "1px solid var(--glass-border)", background: "var(--bg)" }}>
           <div className="px-4 py-4 shrink-0">
             <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>{mockProviders.length} stations nearby</p>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>Sorted by distance</p>
@@ -47,7 +47,7 @@ export default function ExplorePage() {
       </div>
 
       {/* Mobile bottom sheet */}
-      <div className="lg:hidden shrink-0 overflow-x-auto" style={{ borderTop: "1px solid rgba(74,222,128,0.15)", background: "rgba(10,15,13,0.97)" }}>
+      <div className="lg:hidden shrink-0 overflow-x-auto" style={{ borderTop: "1px solid var(--glass-border)", background: "var(--bg)" }}>
         <div className="flex gap-3 px-4 py-4" style={{ minWidth: "max-content" }}>
           {mockProviders.map((p) => (
             <ProviderCardMini key={p.id} provider={p} active={selected === p.id} onSelect={() => setSelected(p.id)} />
@@ -60,7 +60,7 @@ export default function ExplorePage() {
 
 function ProviderCard({ provider: p, active, onSelect }: { provider: Provider; active: boolean; onSelect: () => void }) {
   return (
-    <Link href={`/provider/${p.id}`} onClick={onSelect} className="block rounded-[16px] p-4 transition-all cursor-pointer" style={{ background: active ? "rgba(74,222,128,0.1)" : "rgba(255,255,255,0.04)", border: `1px solid ${active ? "rgba(74,222,128,0.45)" : "rgba(74,222,128,0.14)"}` }}>
+    <Link href={`/provider/${p.id}`} onClick={onSelect} className="block rounded-[16px] p-4 transition-all cursor-pointer" style={{ background: active ? "rgba(74,222,128,0.1)" : "var(--glass-bg)", border: `1px solid ${active ? "rgba(74,222,128,0.45)" : "var(--glass-border)"}` }}>
       <div className="flex gap-3">
         <img src={p.avatar} alt={p.name} className="w-10 h-10 rounded-full shrink-0 object-cover" />
         <div className="flex-1 min-w-0">
@@ -89,7 +89,7 @@ function ProviderCard({ provider: p, active, onSelect }: { provider: Provider; a
 
 function ProviderCardMini({ provider: p, active, onSelect }: { provider: Provider; active: boolean; onSelect: () => void }) {
   return (
-    <Link href={`/provider/${p.id}`} onClick={onSelect} className="flex flex-col gap-2 rounded-2xl p-3 shrink-0 w-52 transition-all" style={{ background: active ? "rgba(74,222,128,0.1)" : "rgba(255,255,255,0.05)", border: `1px solid ${active ? "rgba(74,222,128,0.45)" : "rgba(74,222,128,0.14)"}` }}>
+    <Link href={`/provider/${p.id}`} onClick={onSelect} className="flex flex-col gap-2 rounded-2xl p-3 shrink-0 w-52 transition-all" style={{ background: active ? "rgba(74,222,128,0.1)" : "var(--glass-bg)", border: `1px solid ${active ? "rgba(74,222,128,0.45)" : "var(--glass-border)"}` }}>
       <div className="flex items-center gap-2">
         <img src={p.avatar} alt={p.name} className="w-8 h-8 rounded-full object-cover" />
         <div>

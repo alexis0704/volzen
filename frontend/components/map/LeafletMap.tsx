@@ -26,7 +26,11 @@ export default function LeafletMap({ providers, selected, onSelect }: Props) {
         zoomControl: false,
       });
 
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      const isDark = document.documentElement.dataset.theme !== "light";
+      const tileUrl = isDark
+        ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+      L.tileLayer(tileUrl, {
         attribution: '© <a href="https://www.openstreetmap.org">OSM</a> © CartoDB',
         subdomains: "abcd",
         maxZoom: 19,
