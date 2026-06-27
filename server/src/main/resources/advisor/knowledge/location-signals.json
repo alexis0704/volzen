@@ -2,7 +2,7 @@
   "dataAsOf": "2026-06-28",
   "sourceId": "VOLZEN-LOCATION-SIGNALS-001",
   "sourceType": "internal/pilot",
-  "disclaimer": "Proxy estimates for MVP demos only; not verified demand facts.",
+  "disclaimer": "Proxy estimates for MVP demos only; not verified EV-driver counts or demand facts. Field validation is still required.",
   "locations": [
     {
       "id": "hcmc-d1-office-core",
@@ -10,7 +10,7 @@
       "district": "District 1",
       "siteTypeSignals": ["office", "hotel", "mall", "ride-hailing pickup"],
       "longStayParkingPotential": "medium",
-      "demandPotentialLabel": "high proxy potential",
+      "demandPotentialLabel": "high charging-demand proxy potential driven by dense commercial activity and ride-hailing traffic",
       "sourceId": "VOLZEN-LOCATION-SIGNALS-001",
       "claimType": "internal/pilot"
     },
@@ -20,7 +20,7 @@
       "district": "Tan Binh",
       "siteTypeSignals": ["airport", "long-stay parking", "ride-hailing pickup"],
       "longStayParkingPotential": "high",
-      "demandPotentialLabel": "high proxy potential",
+      "demandPotentialLabel": "very high charging-demand proxy potential due to EV taxi waiting zones, traveler parking, and 24/7 activity",
       "sourceId": "VOLZEN-LOCATION-SIGNALS-001",
       "claimType": "internal/pilot"
     },
@@ -30,7 +30,7 @@
       "district": "Thu Duc",
       "siteTypeSignals": ["apartment", "university", "office"],
       "longStayParkingPotential": "medium",
-      "demandPotentialLabel": "medium proxy potential",
+      "demandPotentialLabel": "medium charging-demand proxy potential based on residential, university, and office activity",
       "sourceId": "VOLZEN-LOCATION-SIGNALS-001",
       "claimType": "internal/pilot"
     },
@@ -40,7 +40,57 @@
       "district": "District 7",
       "siteTypeSignals": ["apartment", "mall", "office", "international school"],
       "longStayParkingPotential": "medium",
-      "demandPotentialLabel": "medium proxy potential",
+      "demandPotentialLabel": "medium charging-demand proxy potential based on long-stay parking and mixed-use activity",
+      "sourceId": "VOLZEN-LOCATION-SIGNALS-001",
+      "claimType": "internal/pilot"
+    },
+    {
+      "id": "long-thanh-expressway-rest-stop",
+      "city": "Dong Nai",
+      "district": "Long Thanh - Dau Giay Expressway Rest Stop",
+      "siteTypeSignals": ["inter-provincial transit corridor", "rest stop", "dc fast charging"],
+      "longStayParkingPotential": "low",
+      "demandPotentialLabel": "high charging-demand proxy potential based on inter-provincial transit and very short dwell times",
+      "sourceId": "VOLZEN-LOCATION-SIGNALS-001",
+      "claimType": "internal/pilot"
+    },
+    {
+      "id": "vung-tau-city",
+      "city": "Vung Tau City",
+      "district": "Ba Ria - Vung Tau",
+      "siteTypeSignals": ["weekend tourism", "hotel overnight parking", "seasonal traffic"],
+      "longStayParkingPotential": "high",
+      "demandPotentialLabel": "medium-high charging-demand proxy potential due to tourism and hotel overnight parking opportunities",
+      "sourceId": "VOLZEN-LOCATION-SIGNALS-001",
+      "claimType": "internal/pilot"
+    },
+    {
+      "id": "vsip-binh-duong",
+      "city": "Binh Duong",
+      "district": "VSIP I Industrial Park",
+      "siteTypeSignals": ["commercial fleet depots", "factory worker parking", "shift-based occupancy"],
+      "longStayParkingPotential": "medium",
+      "demandPotentialLabel": "low-medium charging-demand proxy potential based on fleet depots and daytime worker parking",
+      "sourceId": "VOLZEN-LOCATION-SIGNALS-001",
+      "claimType": "internal/pilot"
+    },
+    {
+      "id": "thao-dien-thu-duc",
+      "city": "Ho Chi Minh City",
+      "district": "Thao Dien, Thu Duc City",
+      "siteTypeSignals": ["high-income residential area", "lifestyle centers", "cafes"],
+      "longStayParkingPotential": "medium",
+      "demandPotentialLabel": "medium charging-demand proxy potential focused on lifestyle centers and cafes because private home charging may be common",
+      "sourceId": "VOLZEN-LOCATION-SIGNALS-001",
+      "claimType": "internal/pilot"
+    },
+    {
+      "id": "aeon-mall-tan-phu",
+      "city": "Ho Chi Minh City",
+      "district": "Aeon Mall Tan Phu Celadon",
+      "siteTypeSignals": ["large retail complex", "family weekend activity", "2 to 4 hour dwell time"],
+      "longStayParkingPotential": "high",
+      "demandPotentialLabel": "high charging-demand proxy potential based on large retail activity and 2 to 4 hour dwell time",
       "sourceId": "VOLZEN-LOCATION-SIGNALS-001",
       "claimType": "internal/pilot"
     }
