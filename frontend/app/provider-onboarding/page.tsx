@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
-import ThemeToggle from "@/components/ThemeToggle";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type Role = "bot" | "user";
@@ -11,14 +10,10 @@ interface Msg { role: Role; text: string; }
 
 // ── Phase 1 scripted messages ──────────────────────────────────────────────
 const PHASE1_MSGS = [
-  "Xin chào! Tôi là trợ lý Volzen 👋 Tôi sẽ hướng dẫn bạn qua quá trình đăng ký trở thành nhà cung cấp trạm sạc EV.",
-  "🇻🇳 Tại Việt Nam, hoạt động kinh doanh trạm sạc xe điện thuộc ngành dịch vụ vận tải — được cấp phép theo Luật Doanh nghiệp 2020 và Nghị định 10/2020/NĐ-CP.",
-  "📋 Bạn có thể lựa chọn một trong các loại hình doanh nghiệp: Doanh nghiệp tư nhân, Công ty TNHH 1 thành viên, hoặc Công ty TNHH 2+ thành viên. Mỗi loại có mức vốn điều lệ và trách nhiệm pháp lý khác nhau.",
-  "💰 Chi phí khởi đầu ước tính: Phí đăng ký doanh nghiệp ~200.000 VNĐ. Thiết bị trạm sạc AC (7–22 kW) từ 8–25 triệu/cổng. Kết nối điện lưới và lắp đặt từ 15–50 triệu tùy quy mô.",
-  "⏱️ Thời gian đăng ký doanh nghiệp qua Cổng thông tin quốc gia thường từ 3–5 ngày làm việc. Sau khi có Giấy phép kinh doanh, bạn cần đăng ký mã số thuế và mở tài khoản ngân hàng doanh nghiệp.",
-  "📈 Theo dữ liệu thị trường 2025, nhu cầu sạc EV tại Việt Nam tăng trưởng ~180%/năm. Doanh thu trung bình một trạm 5 cổng ở khu vực trung tâm TP.HCM đạt 35–80 triệu/tháng.",
-  "✅ Volzen hỗ trợ bạn toàn bộ quy trình: từ tư vấn pháp lý, kết nối đối tác lắp đặt, đến quản lý booking và thanh toán trên nền tảng. Bạn chỉ cần tập trung vào vận hành.",
-  "Bạn đã sẵn sàng để tiến hành bước tiếp theo chưa? Nhấn nút bên dưới để bắt đầu thu thập thông tin đăng ký doanh nghiệp của bạn.",
+  "Xin chào! Tôi là trợ lý Volzen. Tôi sẽ hướng dẫn bạn qua quá trình đăng ký trở thành nhà cung cấp trạm sạc EV.",
+  "Tại Việt Nam, hoạt động kinh doanh trạm sạc xe điện được cấp phép theo Luật Doanh nghiệp 2020. Bạn có thể chọn loại hình doanh nghiệp phù hợp như doanh nghiệp tư nhân hoặc công ty TNHH. Chi phí đăng ký khoảng 200.000 VNĐ, thiết bị trạm sạc từ 8 đến 25 triệu mỗi cổng.",
+  "Thời gian đăng ký qua Cổng thông tin quốc gia thường từ 3 đến 5 ngày. Volzen hỗ trợ bạn toàn bộ quy trình — từ tư vấn pháp lý, kết nối đối tác lắp đặt, đến quản lý booking và thanh toán.",
+  "Bạn đã sẵn sàng để tiến hành bước tiếp theo chưa? Nhấn nút bên dưới để bắt đầu thu thập thông tin đăng ký doanh nghiệp.",
 ];
 
 // ── Phase 2 MCQ questions ──────────────────────────────────────────────────
@@ -127,13 +122,26 @@ async function downloadForm(answers: Record<string, string>) {
   URL.revokeObjectURL(url);
 }
 
+// ── Shared styles ──────────────────────────────────────────────────────────
+const BOT_BUBBLE: React.CSSProperties = {
+  background: "var(--glass-bg)",
+  border: "1px solid var(--glass-border)",
+  color: "var(--text)",
+  borderRadius: "18px 18px 18px 4px",
+};
+
+const USER_BUBBLE: React.CSSProperties = {
+  background: "var(--accent)",
+  color: "var(--accent-fg)",
+  borderRadius: "18px 18px 4px 18px",
+};
+
 // ── Main component ─────────────────────────────────────────────────────────
 function ProviderOnboardingInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isReturning = searchParams.get("returning") === "true";
 
-  // Chat state
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [phase, setPhase] = useState<1 | 2 | 3>(1);
   const [p1Done, setP1Done] = useState(false);
@@ -142,13 +150,11 @@ function ProviderOnboardingInner() {
   const [generating, setGenerating] = useState(false);
   const [formReady, setFormReady] = useState(false);
 
-  // Returning dialog state
   const [returningStep, setReturningStep] = useState<"ask" | "upload" | "verifying" | "done">("ask");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs, generating, formReady]);
 
   // Stream phase 1 messages
@@ -158,7 +164,7 @@ function ProviderOnboardingInner() {
     (async () => {
       for (const text of PHASE1_MSGS) {
         if (cancelled) return;
-        await new Promise(r => setTimeout(r, 900));
+        await new Promise(r => setTimeout(r, 850));
         if (cancelled) return;
         setMsgs(prev => [...prev, { role: "bot", text }]);
       }
@@ -180,8 +186,8 @@ function ProviderOnboardingInner() {
   function startPhase2() {
     setMsgs(prev => [
       ...prev,
-      { role: "user", text: "Tôi đã sẵn sàng! →" },
-      { role: "bot", text: "Tuyệt vời! Tôi sẽ hỏi bạn một vài câu hỏi nhanh để điền sẵn hồ sơ đăng ký doanh nghiệp. Hãy chọn câu trả lời phù hợp nhất." },
+      { role: "user", text: "Tôi đã sẵn sàng." },
+      { role: "bot", text: "Tôi sẽ hỏi bạn một vài câu hỏi để điền sẵn hồ sơ đăng ký doanh nghiệp. Hãy chọn câu trả lời phù hợp nhất." },
     ]);
     setPhase(2);
   }
@@ -195,7 +201,7 @@ function ProviderOnboardingInner() {
     setP2Step(next);
     if (next >= PHASE2_QS.length) {
       setTimeout(() => {
-        setMsgs(prev => [...prev, { role: "bot", text: "Hoàn tất! Đang tạo hồ sơ đăng ký doanh nghiệp của bạn..." }]);
+        setMsgs(prev => [...prev, { role: "bot", text: "Hoàn tất. Đang tạo hồ sơ đăng ký doanh nghiệp của bạn..." }]);
         setGenerating(true);
         setTimeout(() => { setGenerating(false); setFormReady(true); setPhase(3); }, 1800);
       }, 500);
@@ -217,24 +223,23 @@ function ProviderOnboardingInner() {
         <div className="glass rounded-2xl p-8 max-w-md w-full" style={{ border: "1px solid var(--glass-border)" }}>
           {returningStep === "ask" && (
             <>
-              <div className="text-4xl mb-4 text-center">👋</div>
               <h2 className="text-xl font-semibold mb-2 text-center" style={{ color: "var(--text)" }}>
-                Chào mừng trở lại!
+                Chào mừng trở lại
               </h2>
               <p className="text-center mb-8 text-sm" style={{ color: "var(--text-muted)" }}>
-                Hồ sơ đăng ký kinh doanh của bạn đã được cơ quan nhà nước phê duyệt chưa?
+                Hồ sơ đăng ký kinh doanh của bạn đã được phê duyệt chưa?
               </p>
               <div className="flex flex-col gap-3">
                 <button
                   onClick={() => setReturningStep("upload")}
-                  className="w-full py-3 rounded-xl font-semibold text-sm transition-opacity hover:opacity-90"
+                  className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
                   style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
                 >
-                  ✅ Đã có Giấy phép kinh doanh
+                  Đã có Giấy phép kinh doanh
                 </button>
                 <button
                   onClick={() => router.push("/explore")}
-                  className="w-full py-3 rounded-xl text-sm transition-opacity hover:opacity-80"
+                  className="w-full py-3 rounded-xl text-sm transition-all duration-200 hover:opacity-80 active:scale-[0.98]"
                   style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: "var(--text-muted)" }}
                 >
                   Chưa — nhắc tôi lần sau
@@ -246,16 +251,15 @@ function ProviderOnboardingInner() {
           {returningStep === "upload" && (
             <>
               <h2 className="text-lg font-semibold mb-2" style={{ color: "var(--text)" }}>
-                Tải ảnh Giấy phép kinh doanh
+                Tải Giấy phép kinh doanh
               </h2>
               <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>
-                Chụp ảnh hoặc tải lên ảnh scan bản gốc đã được đóng dấu phê duyệt.
+                Chụp ảnh hoặc tải lên bản scan đã được đóng dấu phê duyệt.
               </p>
               <label
-                className="flex flex-col items-center justify-center gap-3 rounded-xl py-10 cursor-pointer transition-colors"
+                className="flex flex-col items-center justify-center gap-3 rounded-xl py-10 cursor-pointer transition-colors hover:opacity-80"
                 style={{ border: "2px dashed var(--glass-border)", background: "var(--glass-bg)" }}
               >
-                <span className="text-3xl">📄</span>
                 <span className="text-sm font-medium" style={{ color: "var(--accent)" }}>Chọn ảnh hoặc chụp ngay</span>
                 <span className="text-xs" style={{ color: "var(--text-muted)" }}>JPG, PNG, PDF · tối đa 10 MB</span>
                 <input type="file" accept="image/*,.pdf" capture="environment" className="sr-only" onChange={handleFileChange} />
@@ -273,17 +277,16 @@ function ProviderOnboardingInner() {
 
           {returningStep === "done" && (
             <div className="flex flex-col items-center gap-4 py-4 text-center">
-              <div className="text-5xl">🎉</div>
-              <h2 className="text-xl font-semibold" style={{ color: "var(--text)" }}>Xác minh thành công!</h2>
+              <h2 className="text-xl font-semibold" style={{ color: "var(--text)" }}>Xác minh thành công</h2>
               <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                Tài khoản nhà cung cấp của bạn đã được kích hoạt. Chào mừng đến với Volzen!
+                Tài khoản nhà cung cấp của bạn đã được kích hoạt.
               </p>
               <button
                 onClick={() => router.push("/host/financial/")}
-                className="mt-2 px-6 py-3 rounded-xl font-semibold text-sm transition-opacity hover:opacity-90"
+                className="mt-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
                 style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
               >
-                Vào Dashboard →
+                Vào Dashboard
               </button>
             </div>
           )}
@@ -297,140 +300,188 @@ function ProviderOnboardingInner() {
   const waitingForAnswer = phase === 2 && !generating && !formReady && p2Step < PHASE2_QS.length && msgs.at(-1)?.role === "bot";
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: "var(--bg)" }}>
+    <div className="flex flex-col h-dvh" style={{ background: "var(--bg)" }}>
       {/* Header */}
       <header
-        className="flex items-center justify-between px-5 py-3 shrink-0"
+        className="flex items-center justify-between px-4 py-3 shrink-0"
         style={{ borderBottom: "1px solid var(--glass-border)", background: "var(--glass-bg)", backdropFilter: "blur(12px)" }}
       >
         <div className="flex items-center gap-3">
-          <Link href="/" className="font-bold text-lg tracking-tight" style={{ color: "var(--accent)" }}>
-            volzen
+          <Link href="/" className="font-bold tracking-tight" style={{ color: "var(--accent)", fontSize: 15 }}>
+            VOLZEN
           </Link>
-          <span className="text-xs px-2.5 py-0.5 rounded-full font-medium" style={{ background: "rgba(74,222,128,0.12)", color: "var(--accent)" }}>
+          <span className="text-[11px] px-2.5 py-1 rounded-full font-medium" style={{ background: "rgba(74,222,128,0.12)", color: "var(--accent)" }}>
             Đăng ký Nhà cung cấp
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-xs hidden sm:block" style={{ color: "var(--text-muted)" }}>
-            {phase === 1 ? "Bước 1 / 3 — Tư vấn" : phase === 2 ? "Bước 2 / 3 — Thu thập thông tin" : "Bước 3 / 3 — Hoàn tất"}
+          <span className="text-[11px] hidden sm:block font-medium" style={{ color: "var(--text-muted)" }}>
+            {phase === 1 ? "Bước 1/3" : phase === 2 ? "Bước 2/3" : "Hoàn tất"}
           </span>
-          <ThemeToggle />
+          {/* Step dots */}
+          <div className="flex gap-1.5">
+            {[1, 2, 3].map(s => (
+              <div key={s} className="w-1.5 h-1.5 rounded-full transition-colors duration-300"
+                style={{ background: phase >= s ? "var(--accent)" : "rgba(255,255,255,0.1)" }}
+              />
+            ))}
+          </div>
+          <Link href="/" className="text-[11px] font-medium transition-opacity hover:opacity-70" style={{ color: "var(--text-muted)" }}>
+            Thoát
+          </Link>
         </div>
       </header>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 max-w-2xl w-full mx-auto">
-        {msgs.map((m, i) => (
-          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div
-              className="max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed"
-              style={
-                m.role === "bot"
-                  ? { background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: "var(--text)" }
-                  : { background: "var(--accent)", color: "var(--accent-fg)" }
-              }
-            >
-              {m.text}
-            </div>
-          </div>
-        ))}
-
-        {/* Typing indicator */}
-        {!p1Done && phase === 1 && msgs.length > 0 && msgs.length < PHASE1_MSGS.length && (
-          <div className="flex justify-start">
-            <div
-              className="rounded-2xl px-4 py-3 flex gap-1.5 items-center"
-              style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}
-            >
-              {[0, 1, 2].map(d => (
-                <span
-                  key={d}
-                  className="w-2 h-2 rounded-full animate-bounce"
-                  style={{ background: "var(--accent)", animationDelay: `${d * 150}ms` }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Generating shimmer */}
-        {generating && (
-          <div className="flex justify-start">
-            <div
-              className="rounded-2xl px-4 py-3 w-48 h-10 animate-pulse"
-              style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}
-            />
-          </div>
-        )}
-
-        {/* Download button */}
-        {formReady && (
-          <div className="flex justify-start">
-            <div
-              className="max-w-[80%] rounded-2xl px-4 py-3 text-sm space-y-3"
-              style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: "var(--text)" }}
-            >
-              <p>🎉 Hồ sơ đã sẵn sàng! Tải xuống, điền các thông tin cá nhân còn thiếu, rồi nộp cho Cổng thông tin Đăng ký doanh nghiệp quốc gia.</p>
-              <button
-                onClick={() => downloadForm(answers)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-90"
-                style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+      <div className="flex-1 overflow-y-auto px-4 py-5">
+        <div className="max-w-xl mx-auto space-y-4">
+          {msgs.map((m, i) => (
+            <div key={i} className={`flex items-end gap-2.5 ${m.role === "user" ? "flex-row-reverse" : ""}`}>
+              {/* Avatar */}
+              {m.role === "bot" && (
+                <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center"
+                  style={{ background: "color-mix(in srgb, var(--accent) 15%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 25%, transparent)" }}
+                >
+                  <div className="w-2 h-2 rounded-full" style={{ background: "var(--accent)" }} />
+                </div>
+              )}
+              {/* Bubble */}
+              <div
+                className="max-w-[82%] px-4 py-2.5 text-sm leading-relaxed shadow-sm"
+                style={m.role === "bot" ? BOT_BUBBLE : USER_BUBBLE}
               >
-                ⬇️ Tải Giấy đề nghị đăng ký (.docx)
-              </button>
-              <button
-                onClick={() => router.push("/")}
-                className="text-xs underline"
-                style={{ color: "var(--text-muted)" }}
-              >
-                Xong, về trang chủ
-              </button>
+                {m.text}
+              </div>
             </div>
-          </div>
-        )}
+          ))}
 
-        <div ref={bottomRef} />
+          {/* Typing indicator */}
+          {!p1Done && phase === 1 && msgs.length > 0 && msgs.length < PHASE1_MSGS.length && (
+            <div className="flex items-end gap-2.5">
+              <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center"
+                style={{ background: "color-mix(in srgb, var(--accent) 15%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 25%, transparent)" }}
+              >
+                <div className="w-2 h-2 rounded-full" style={{ background: "var(--accent)" }} />
+              </div>
+              <div className="px-4 py-3 flex gap-1.5 items-center" style={BOT_BUBBLE}>
+                {[0, 1, 2].map(d => (
+                  <span
+                    key={d}
+                    className="w-1.5 h-1.5 rounded-full animate-bounce"
+                    style={{ background: "var(--accent)", animationDelay: `${d * 150}ms` }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Generating shimmer */}
+          {generating && (
+            <div className="flex items-end gap-2.5">
+              <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center"
+                style={{ background: "color-mix(in srgb, var(--accent) 15%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 25%, transparent)" }}
+              >
+                <div className="w-2 h-2 rounded-full" style={{ background: "var(--accent)" }} />
+              </div>
+              <div className="px-4 py-3 w-48 h-10 animate-pulse rounded-[18px_18px_18px_4px]"
+                style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}
+              />
+            </div>
+          )}
+
+          {/* Download card */}
+          {formReady && (
+            <div className="flex items-end gap-2.5">
+              <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center"
+                style={{ background: "color-mix(in srgb, var(--accent) 15%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 25%, transparent)" }}
+              >
+                <div className="w-2 h-2 rounded-full" style={{ background: "var(--accent)" }} />
+              </div>
+              <div className="max-w-[82%] rounded-2xl px-4 py-4 text-sm space-y-3"
+                style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, transparent), transparent)", border: "1px solid color-mix(in srgb, var(--accent) 25%, transparent)", color: "var(--text)" }}
+              >
+                <div className="min-w-0">
+                  <p className="font-semibold text-sm mb-1">Hồ sơ đã sẵn sàng</p>
+                  <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                    Tải xuống, điền các thông tin cá nhân còn thiếu, rồi nộp cho Cổng thông tin Đăng ký doanh nghiệp quốc gia.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => downloadForm(answers)}
+                    className="px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+                    style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+                  >
+                    Tải xuống (.docx)
+                  </button>
+                  <button
+                    onClick={() => router.push("/")}
+                    className="px-4 py-2 rounded-xl text-xs font-medium transition-all duration-200 hover:opacity-80"
+                    style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: "var(--text-muted)" }}
+                  >
+                    Về trang chủ
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div ref={bottomRef} />
+        </div>
       </div>
 
-      {/* CTA / MCQ bar */}
+      {/* Bottom bar */}
       <div
-        className="shrink-0 px-4 py-4 max-w-2xl w-full mx-auto"
-        style={{ borderTop: "1px solid var(--glass-border)" }}
+        className="shrink-0 px-4 py-4"
+        style={{ borderTop: "1px solid var(--glass-border)", background: "color-mix(in srgb, var(--bg) 95%, transparent)" }}
       >
-        {/* Phase 1 CTA */}
-        {p1Done && phase === 1 && (
-          <button
-            onClick={startPhase2}
-            className="w-full py-3 rounded-xl font-semibold text-sm transition-opacity hover:opacity-90"
-            style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-          >
-            Tôi đã sẵn sàng! Tiến hành bước tiếp theo →
-          </button>
-        )}
+        <div className="max-w-xl mx-auto">
+          {/* Phase 1 CTA */}
+          {p1Done && phase === 1 && (
+            <button
+              onClick={startPhase2}
+              className="w-full h-12 rounded-2xl font-semibold text-sm transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+              style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+            >
+              Tiếp tục
+            </button>
+          )}
 
-        {/* Phase 2 MCQ options */}
-        {waitingForAnswer && currentQ && (
-          <div className="flex flex-wrap gap-2">
-            {currentQ.opts.map(opt => (
-              <button
-                key={opt}
-                onClick={() => pickAnswer(opt)}
-                className="px-4 py-2 rounded-full text-sm font-medium transition-all hover:scale-[1.03]"
-                style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", color: "var(--text)" }}
-              >
-                {opt}
-              </button>
-            ))}
-          </div>
-        )}
+          {/* Phase 2 MCQ options */}
+          {waitingForAnswer && currentQ && (
+            <div className="space-y-1.5">
+              {currentQ.opts.map((opt, i) => (
+                <button
+                  key={opt}
+                  onClick={() => pickAnswer(opt)}
+                  className="w-full flex items-center gap-3 h-12 px-4 rounded-2xl text-sm font-medium transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                  style={{
+                    background: "var(--glass-bg)",
+                    border: "1px solid var(--glass-border)",
+                    color: "var(--text)",
+                  }}
+                >
+                  <span className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold"
+                    style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)", color: "var(--accent)" }}
+                  >
+                    {i + 1}
+                  </span>
+                  <span className="flex-1 text-left">{opt}</span>
+                </button>
+              ))}
+              <p className="text-[11px] text-center pt-1 font-medium" style={{ color: "var(--text-muted)" }}>
+                {p2Step + 1}/{PHASE2_QS.length}
+              </p>
+            </div>
+          )}
 
-        {/* Phase 3 — idle state */}
-        {phase === 3 && !generating && formReady && (
-          <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
-            Hoàn tất — tải hồ sơ ở trên hoặc về trang chủ.
-          </p>
-        )}
+          {/* Phase 3 — idle state */}
+          {phase === 3 && !generating && formReady && (
+            <p className="text-xs text-center font-medium py-2" style={{ color: "var(--text-muted)" }}>
+              Hoàn tất — hồ sơ đã sẵn sàng
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

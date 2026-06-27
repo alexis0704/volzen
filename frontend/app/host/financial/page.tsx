@@ -1,19 +1,24 @@
 "use client";
 
-import { ArrowDownToLine, CalendarDays, CreditCard, TrendingUp, Wallet } from "lucide-react";
-import { useMemo, useState } from "react";
+import { ArrowDownToLine, CreditCard, Wallet } from "lucide-react";
+import { useState } from "react";
+import {
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from "recharts";
 import { ProviderCard, ProviderShell, StatusBadge } from "@/components/provider/ProviderShell";
-import { occupancyRevenue, providerSummary, revenueSeries, transactions, weeklyRevenue } from "@/lib/provider-data";
+import {
+  providerSummary, revenueTimeSeries, monthlyRevenue, weeklyRevenue,
+  occupancyRevenue, revenueBreakdown, transactions,
+} from "@/lib/provider-data";
 
 const filters = ["Today", "This Week", "This Month", "This Year"];
+const formatVND = (v: number) => `₫${(v / 1_000_000).toFixed(1)}M`;
 
 export default function FinancialDashboardPage() {
   const [activeFilter, setActiveFilter] = useState("This Month");
   const [selectedTx, setSelectedTx] = useState<(typeof transactions)[number] | null>(null);
   const [notice, setNotice] = useState("Showing this month's provider performance.");
-  const multiplier = filters.indexOf(activeFilter) + 1;
-  const adjustedSeries = useMemo(() => revenueSeries.map((value) => Math.max(24, value - 8 + multiplier * 4)), [multiplier]);
-  const points = adjustedSeries.map((value, index) => `${index * 9},${120 - value}`).join(" ");
 
   function handleWithdraw() {
     setNotice("Withdrawal request created for ₫7.2M. Payout status is now pending.");
@@ -22,22 +27,25 @@ export default function FinancialDashboardPage() {
   return (
     <ProviderShell>
       <div className="flex flex-col gap-5">
+        {/* Header */}
         <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-emerald-700">Financial Dashboard</p>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-4xl">Earnings overview</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Monitor revenue, payouts, station performance, and charging business trends.</p>
+            <p className="text-sm font-semibold" style={{ color: "#e2e8f0" }}>Financial Dashboard</p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-4xl" style={{ color: "var(--text)" }}>Earnings overview</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6" style={{ color: "var(--text-muted)" }}>Monitor revenue, payouts, and charging business trends.</p>
           </div>
-          <div className="grid w-full grid-cols-4 gap-1 rounded-2xl bg-white p-1 ring-1 ring-emerald-900/10 sm:w-auto sm:gap-2 sm:bg-transparent sm:p-0 sm:ring-0">
+          <div className="grid w-full grid-cols-4 gap-1 rounded-2xl p-1 sm:w-auto sm:gap-2 sm:bg-transparent sm:p-0"
+            style={{ background: "color-mix(in srgb, var(--glass-bg) 60%, transparent)" }}>
             {filters.map((filter) => (
               <button
                 key={filter}
                 type="button"
-                onClick={() => {
-                  setActiveFilter(filter);
-                  setNotice(`Revenue analytics updated for ${filter.toLowerCase()}.`);
+                onClick={() => { setActiveFilter(filter); setNotice(`Revenue analytics updated for ${filter.toLowerCase()}.`); }}
+                className="h-9 rounded-xl px-1 text-[11px] font-semibold transition-all duration-200 active:scale-95 sm:h-11 sm:rounded-full sm:px-4 sm:text-sm"
+                style={{
+                  background: activeFilter === filter ? "#e2e8f0" : "transparent",
+                  color: activeFilter === filter ? "#0a0f0d" : "var(--text-muted)",
                 }}
-                className={`h-9 rounded-xl px-1 text-[11px] font-semibold transition active:scale-95 sm:h-11 sm:rounded-full sm:px-4 sm:text-sm ${activeFilter === filter ? "bg-[#0d1f18] text-white" : "text-slate-600 sm:bg-white sm:ring-1 sm:ring-emerald-900/10"}`}
               >
                 <span className="sm:hidden">{filter.replace("This ", "").replace("Today", "Day")}</span>
                 <span className="hidden sm:inline">{filter}</span>
@@ -46,132 +54,199 @@ export default function FinancialDashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-emerald-900/10 bg-white px-4 py-3 text-sm font-semibold text-emerald-800 shadow-sm shadow-emerald-950/5">
+        {/* Notice */}
+        <div className="rounded-lg px-4 py-3 text-sm font-semibold"
+          style={{ background: "rgba(226,232,240,0.08)", border: "1px solid rgba(226,232,240,0.2)", color: "#e2e8f0" }}>
           {notice}
         </div>
 
+        {/* Summary cards */}
         <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
           {providerSummary.map((item) => (
             <ProviderCard key={item.label}>
-              <p className="text-xs leading-4 text-slate-500 sm:text-sm">{item.label}</p>
+              <p className="text-xs leading-4 sm:text-sm" style={{ color: "var(--text-muted)" }}>{item.label}</p>
               <div className="mt-3 flex items-end justify-between gap-3">
-                <p className="text-xl font-bold tracking-tight sm:text-2xl">{item.value}</p>
-                <StatusBadge tone={item.delta === "Ready" ? "orange" : "green"}>{item.delta}</StatusBadge>
+                <p className="text-xl font-bold tracking-tight sm:text-2xl" style={{ color: "var(--text)" }}>{item.value}</p>
+                <StatusBadge tone={
+                  item.delta === "Ready" ? "orange"
+                  : item.delta.includes("%") ? "green"
+                  : "slate"
+                }>{item.delta}</StatusBadge>
               </div>
             </ProviderCard>
           ))}
         </div>
 
+        {/* Charts row */}
         <div className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
+          {/* Revenue Area Chart */}
           <ProviderCard>
             <div className="mb-5 flex items-center justify-between">
               <div>
-                <h2 className="font-bold">Revenue Analytics</h2>
-                <p className="text-sm text-slate-500">Daily earnings trend</p>
+                <h2 className="font-bold" style={{ color: "var(--text)" }}>Revenue Analytics</h2>
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>Daily earnings trend</p>
               </div>
-              <TrendingUp size={20} className="text-emerald-600" />
             </div>
-            <div className="h-52 rounded-3xl bg-gradient-to-b from-emerald-50 to-white p-4 sm:h-64">
-              <svg viewBox="0 0 100 130" className="h-full w-full overflow-visible" preserveAspectRatio="none" aria-label="Daily revenue line chart">
-                <defs>
-                  <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#22c55e" stopOpacity="0.32" />
-                    <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <polyline points={`0,125 ${points} 99,125`} fill="url(#revenueFill)" stroke="none" />
-                <polyline points={points} fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+            <div className="h-52 sm:h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={revenueTimeSeries} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(120,113,108,0.08)" />
+                  <XAxis dataKey="day" tick={{ fill: "var(--text-muted)", fontSize: 10 }} tickLine={false} interval={4} />
+                  <YAxis tick={{ fill: "var(--text-muted)", fontSize: 10 }} tickLine={false} tickFormatter={v => `${(v / 1_000_000).toFixed(0)}M`} />
+                  <Tooltip
+                    contentStyle={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", borderRadius: 12, color: "var(--text)" }}
+                    formatter={(v) => [formatVND(Number(v)), "Revenue"]}
+                  />
+                  <Area type="monotone" dataKey="revenue" stroke="#a78bfa" strokeWidth={2.5} fill="rgba(167,139,250,0.04)" dot={false} activeDot={{ r: 4, strokeWidth: 0, fill: "#f472b6" }} />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </ProviderCard>
 
+          {/* Weekly Revenue Bar Chart */}
           <ProviderCard>
             <div className="mb-5 flex items-center justify-between">
               <div>
-                <h2 className="font-bold">Weekly Revenue</h2>
-                <p className="text-sm text-slate-500">Bar chart by day</p>
+                <h2 className="font-bold" style={{ color: "var(--text)" }}>Weekly Revenue</h2>
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>Bar chart by day</p>
               </div>
-              <CalendarDays size={20} className="text-emerald-600" />
             </div>
-            <div className="flex h-52 items-end gap-2 rounded-3xl bg-slate-50 p-3 sm:h-64 sm:gap-3 sm:p-4">
-              {weeklyRevenue.map((value, index) => (
-                <div key={index} className="flex flex-1 flex-col items-center gap-2">
-                  <div className="w-full rounded-t-2xl bg-emerald-500" style={{ height: `${value}px` }} />
-                  <span className="text-xs font-medium text-slate-400">{["M", "T", "W", "T", "F", "S", "S"][index]}</span>
-                </div>
-              ))}
+            <div className="h-52 sm:h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={weeklyRevenue} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(120,113,108,0.08)" />
+                  <XAxis dataKey="day" tick={{ fill: "var(--text-muted)", fontSize: 11 }} tickLine={false} />
+                  <YAxis tick={{ fill: "var(--text-muted)", fontSize: 10 }} tickLine={false} tickFormatter={v => `${(v / 1_000_000).toFixed(0)}M`} />
+                  <Tooltip
+                    contentStyle={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", borderRadius: 12, color: "var(--text)" }}
+                    formatter={(v) => [formatVND(Number(v)), "Revenue"]}
+                  />
+                  <Bar dataKey="revenue" radius={[8, 8, 0, 0]} fill="rgba(192,132,252,0.06)" stroke="#c084fc" strokeWidth={2} maxBarSize={40} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </ProviderCard>
         </div>
 
+        {/* Second row */}
         <div className="grid gap-5 xl:grid-cols-2">
+          {/* Occupancy vs Revenue Composed Chart */}
           <ProviderCard>
-            <h2 className="font-bold">Occupancy vs Revenue</h2>
-            <div className="mt-5 flex flex-col gap-4">
-              {occupancyRevenue.map((item) => (
-                <div key={item.day} className="grid grid-cols-[36px_1fr] items-center gap-3">
-                  <span className="text-xs font-semibold text-slate-500">{item.day}</span>
-                  <div className="space-y-1.5">
-                    <div className="h-2 rounded-full bg-slate-100"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${item.occupancy}%` }} /></div>
-                    <div className="h-2 rounded-full bg-slate-100"><div className="h-full rounded-full bg-slate-900" style={{ width: `${item.revenue}%` }} /></div>
-                  </div>
-                </div>
-              ))}
+            <h2 className="font-bold" style={{ color: "var(--text)" }}>Occupancy vs Revenue</h2>
+            <div className="mt-5 h-52 sm:h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={occupancyRevenue} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(120,113,108,0.08)" />
+                  <XAxis dataKey="day" tick={{ fill: "var(--text-muted)", fontSize: 11 }} tickLine={false} />
+                  <YAxis tick={{ fill: "var(--text-muted)", fontSize: 10 }} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", borderRadius: 12, color: "var(--text)" }}
+                  />
+                  <Bar dataKey="occupancy" radius={[6, 6, 0, 0]} fill="rgba(167,139,250,0.06)" stroke="#a78bfa" strokeWidth={2} maxBarSize={30} />
+                  <Bar dataKey="revenue" radius={[6, 6, 0, 0]} fill="rgba(45,212,191,0.06)" stroke="#2dd4bf" strokeWidth={2} maxBarSize={30} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </ProviderCard>
 
+          {/* Revenue Breakdown Pie */}
           <ProviderCard>
-            <h2 className="font-bold">Revenue Breakdown</h2>
-            <div className="mt-5 space-y-4">
-              {[
-                ["Charging Revenue", "₫21.4M"],
-                ["Platform Fees", "-₫2.7M"],
-                ["Net Earnings", "₫18.7M"],
-                ["Avg. Revenue / Session", "₫74,200"],
-              ].map(([label, value]) => (
-                <div key={label} className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
-                  <span className="text-sm text-slate-500">{label}</span>
-                  <span className="font-bold">{value}</span>
-                </div>
-              ))}
+            <h2 className="font-bold" style={{ color: "var(--text)" }}>Revenue Breakdown</h2>
+            <div className="mt-2 h-52 sm:h-56 flex items-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={revenueBreakdown} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={3}>
+                    {revenueBreakdown.map((entry, i) => (
+                      <Cell key={i} fill={entry.fill} stroke={entry.color} strokeWidth={1.5} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", borderRadius: 12, color: "var(--text)" }}
+                    formatter={(v) => [formatVND(Number(v)), ""]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="shrink-0 space-y-2 text-xs" style={{ color: "var(--text-muted)" }}>
+                {revenueBreakdown.map((item) => (
+                  <div key={item.name} className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: item.color }} />
+                    <span>{item.name}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </ProviderCard>
         </div>
 
+        {/* Monthly Revenue + Payout */}
         <div className="grid gap-5 xl:grid-cols-[1.4fr_0.8fr]">
           <ProviderCard>
-            <h2 className="font-bold">Transaction History</h2>
+            <h2 className="font-bold" style={{ color: "var(--text)" }}>Monthly Revenue</h2>
+            <div className="mt-4 h-44 sm:h-52">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={monthlyRevenue} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(120,113,108,0.08)" />
+                  <XAxis dataKey="month" tick={{ fill: "var(--text-muted)", fontSize: 10 }} tickLine={false} />
+                  <YAxis tick={{ fill: "var(--text-muted)", fontSize: 10 }} tickLine={false} tickFormatter={v => `${(v / 1_000_000).toFixed(0)}M`} />
+                  <Tooltip
+                    contentStyle={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", borderRadius: 12, color: "var(--text)" }}
+                    formatter={(v) => [formatVND(Number(v)), "Revenue"]}
+                  />
+                  <Area type="monotone" dataKey="revenue" stroke="#a78bfa" strokeWidth={2.5} fill="rgba(167,139,250,0.04)" dot={{ r: 4, fill: "#f472b6" }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </ProviderCard>
+
+          <ProviderCard>
+            <Wallet size={20} style={{ color: "#94a3b8" }} />
+            <h2 className="mt-4 font-bold" style={{ color: "var(--text)" }}>Payout</h2>
+            <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>Available Balance</p>
+            <p className="mt-3 text-4xl font-bold" style={{ color: "var(--text)" }}>₫7.2M</p>
+            <div className="mt-5 rounded-3xl p-4" style={{ background: "color-mix(in srgb, var(--glass-bg) 60%, transparent)" }}>
+              <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "color-mix(in srgb, var(--text-muted) 60%, transparent)" }}>Connected Bank</p>
+              <p className="mt-1 font-semibold" style={{ color: "var(--text)" }}>Vietcombank •••• 8821</p>
+            </div>
+            <button
+              type="button"
+              onClick={handleWithdraw}
+              className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-lg font-bold transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+              style={{ background: "#e2e8f0", color: "#0a0f0d" }}
+            >
+              <ArrowDownToLine size={18} /> Withdraw
+            </button>
+          </ProviderCard>
+        </div>
+
+        {/* Transactions */}
+        <div className="grid gap-5 xl:grid-cols-[1.4fr_0.8fr]">
+          <ProviderCard>
+            <h2 className="font-bold" style={{ color: "var(--text)" }}>Transaction History</h2>
             <div className="mt-4 space-y-3 lg:hidden">
               {transactions.map((tx) => (
-                <TransactionCard
-                  key={`${tx.date}-${tx.driver}`}
-                  tx={tx}
-                  onSelect={() => {
-                    setSelectedTx(tx);
-                    setNotice(`Selected ${tx.driver}'s ${tx.amount} transaction.`);
-                  }}
-                />
+                <TransactionCard key={`${tx.date}-${tx.driver}`} tx={tx} onSelect={() => { setSelectedTx(tx); setNotice(`Selected ${tx.driver}'s ${tx.amount} transaction.`); }} />
               ))}
             </div>
-            <div className="mt-4 hidden overflow-x-auto rounded-3xl border border-slate-100 lg:block">
+            <div className="mt-4 hidden overflow-x-auto rounded-3xl lg:block"
+              style={{ border: "1px solid color-mix(in srgb, var(--glass-border) 50%, transparent)" }}>
               <table className="min-w-[720px] w-full text-left text-sm">
-                <thead className="bg-slate-50 text-slate-500">
-                  <tr>{["Date", "Driver", "Vehicle", "Duration", "Amount", "Status"].map((h) => <th key={h} className="px-4 py-3 font-semibold">{h}</th>)}</tr>
+                <thead>
+                  <tr style={{ background: "color-mix(in srgb, var(--glass-bg) 60%, transparent)", color: "var(--text-muted)" }}>
+                    {["Date", "Driver", "Vehicle", "Duration", "Amount", "Status"].map((h) => <th key={h} className="px-4 py-3 font-semibold">{h}</th>)}
+                  </tr>
                 </thead>
                 <tbody>
                   {transactions.map((tx) => (
                     <tr
                       key={`${tx.date}-${tx.driver}`}
-                      onClick={() => {
-                        setSelectedTx(tx);
-                        setNotice(`Selected ${tx.driver}'s ${tx.amount} transaction.`);
-                      }}
-                      className="cursor-pointer border-t border-slate-100 transition hover:bg-emerald-50/50"
+                      onClick={() => { setSelectedTx(tx); setNotice(`Selected ${tx.driver}'s ${tx.amount} transaction.`); }}
+                      className="cursor-pointer transition-all duration-200"
+                      style={{ borderTop: "1px solid color-mix(in srgb, var(--glass-border) 40%, transparent)", color: "var(--text)" }}
                     >
                       <td className="px-4 py-4">{tx.date}</td>
                       <td className="px-4 py-4 font-semibold">{tx.driver}</td>
-                      <td className="px-4 py-4 text-slate-500">{tx.vehicle}</td>
-                      <td className="px-4 py-4 text-slate-500">{tx.duration}</td>
+                      <td className="px-4 py-4" style={{ color: "var(--text-muted)" }}>{tx.vehicle}</td>
+                      <td className="px-4 py-4" style={{ color: "var(--text-muted)" }}>{tx.duration}</td>
                       <td className="px-4 py-4 font-bold">{tx.amount}</td>
                       <td className="px-4 py-4"><StatusBadge tone={tx.status === "Paid" ? "green" : "orange"}>{tx.status}</StatusBadge></td>
                     </tr>
@@ -181,42 +256,30 @@ export default function FinancialDashboardPage() {
             </div>
           </ProviderCard>
 
-          <ProviderCard>
-            <Wallet className="text-emerald-600" />
-            <h2 className="mt-4 font-bold">Payout</h2>
-            <p className="mt-1 text-sm text-slate-500">Available Balance</p>
-            <p className="mt-3 text-4xl font-bold">₫7.2M</p>
-            <div className="mt-5 rounded-3xl bg-slate-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Connected Bank</p>
-              <p className="mt-1 font-semibold">Vietcombank •••• 8821</p>
-            </div>
-            <button
-              type="button"
-              onClick={handleWithdraw}
-              className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 font-bold text-[#0d1f18] transition active:scale-95"
-            >
-              <ArrowDownToLine size={18} /> Withdraw
-            </button>
-          </ProviderCard>
-        </div>
-
-        {selectedTx && (
-          <div className="fixed inset-x-3 bottom-[88px] z-50 max-h-[62dvh] overflow-y-auto rounded-[28px] border border-emerald-900/10 bg-white p-4 shadow-2xl shadow-emerald-950/15 lg:left-auto lg:right-6 lg:w-96">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold text-emerald-700">Transaction selected</p>
-                <h3 className="mt-1 text-lg font-bold">{selectedTx.driver}</h3>
+          {/* Transaction detail */}
+          {selectedTx && (
+            <div className="fixed inset-x-3 bottom-[88px] z-50 max-h-[62dvh] overflow-y-auto rounded-2xl p-4 shadow-2xl lg:left-auto lg:right-6 lg:w-96"
+              style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", backdropFilter: "blur(14px)" }}>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold" style={{ color: "#e2e8f0" }}>Transaction selected</p>
+                  <h3 className="mt-1 text-lg font-bold" style={{ color: "var(--text)" }}>{selectedTx.driver}</h3>
+                </div>
+                <button type="button" onClick={() => setSelectedTx(null)}
+                  className="rounded-lg px-3 py-1 text-sm font-bold transition-opacity hover:opacity-80"
+                  style={{ background: "color-mix(in srgb, var(--glass-bg) 60%, transparent)", color: "var(--text-muted)" }}>
+                  Close
+                </button>
               </div>
-              <button type="button" onClick={() => setSelectedTx(null)} className="rounded-full bg-slate-100 px-3 py-1 text-sm font-bold">Close</button>
+              <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <Info label="Date" value={selectedTx.date} />
+                <Info label="Amount" value={selectedTx.amount} />
+                <Info label="Vehicle" value={selectedTx.vehicle} />
+                <Info label="Duration" value={selectedTx.duration} />
+              </div>
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-              <Info label="Date" value={selectedTx.date} />
-              <Info label="Amount" value={selectedTx.amount} />
-              <Info label="Vehicle" value={selectedTx.vehicle} />
-              <Info label="Duration" value={selectedTx.duration} />
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </ProviderShell>
   );
@@ -224,17 +287,18 @@ export default function FinancialDashboardPage() {
 
 function TransactionCard({ tx, onSelect }: { tx: (typeof transactions)[number]; onSelect: () => void }) {
   return (
-    <button type="button" onClick={onSelect} className="w-full rounded-3xl bg-slate-50 p-4 text-left transition active:scale-[0.99]">
+    <button type="button" onClick={onSelect} className="w-full rounded-xl p-4 text-left transition-all duration-200 active:scale-[0.99]"
+      style={{ background: "color-mix(in srgb, var(--glass-bg) 60%, transparent)" }}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-bold">{tx.driver}</p>
-          <p className="text-sm text-slate-500">{tx.date} · {tx.vehicle}</p>
+          <p className="font-bold" style={{ color: "var(--text)" }}>{tx.driver}</p>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>{tx.date} · {tx.vehicle}</p>
         </div>
         <StatusBadge tone={tx.status === "Paid" ? "green" : "orange"}>{tx.status}</StatusBadge>
       </div>
       <div className="mt-4 flex items-center justify-between">
-        <span className="flex items-center gap-2 text-sm text-slate-500"><CreditCard size={15} /> {tx.duration}</span>
-        <span className="font-bold">{tx.amount}</span>
+        <span className="flex items-center gap-2 text-sm" style={{ color: "var(--text-muted)" }}><CreditCard size={15} /> {tx.duration}</span>
+        <span className="font-bold" style={{ color: "var(--text)" }}>{tx.amount}</span>
       </div>
     </button>
   );
@@ -242,9 +306,9 @@ function TransactionCard({ tx, onSelect }: { tx: (typeof transactions)[number]; 
 
 function Info({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-slate-50 p-3">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-1 font-bold">{value}</p>
+    <div className="rounded-lg p-3" style={{ background: "color-mix(in srgb, var(--glass-bg) 60%, transparent)" }}>
+      <p className="text-xs" style={{ color: "var(--text-muted)" }}>{label}</p>
+      <p className="mt-1 font-bold" style={{ color: "var(--text)" }}>{value}</p>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Zap, Car, Plus, Trash2, Check } from "lucide-react";
+import { Car, Plus, Trash2, Check } from "lucide-react";
 import type { ConnectorType, Vehicle } from "@/lib/domain";
 import { createVehicle } from "@/lib/api";
 
@@ -57,9 +57,8 @@ export default function OnboardingPage() {
         <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full opacity-10 blur-[100px] pointer-events-none" style={{ background: "#4ade80" }} aria-hidden />
         <div className="glass p-8 relative">
           {/* Header */}
-          <div className="flex items-center gap-2 mb-8">
-            <Zap className="text-green-400" size={20} fill="currentColor" />
-            <span className="font-bold text-lg" style={{ color: "var(--text)" }}>Volzen</span>
+          <div className="mb-8">
+            <span className="font-bold text-lg" style={{ color: "var(--text)" }}>VOLZEN</span>
           </div>
 
           {/* Progress dots */}

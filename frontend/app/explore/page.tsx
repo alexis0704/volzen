@@ -55,7 +55,7 @@ export default function ExplorePage() {
       <nav className="flex items-center gap-3 px-4 py-3 shrink-0" style={{ borderBottom: "1px solid var(--glass-border)", background: "var(--glass-bg)", backdropFilter: "blur(12px)" }}>
         <Link href="/" className="flex items-center gap-1.5">
           <Zap size={18} style={{ color: "var(--accent)" }} fill="currentColor" />
-          <span className="font-bold" style={{ color: "var(--text)" }}>Volzen</span>
+          <span className="font-bold" style={{ color: "var(--text)" }}>VOLZEN</span>
         </Link>
         <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(74,222,128,0.12)", color: "var(--accent)" }}>Driver</span>
         <div className="ml-auto flex items-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>

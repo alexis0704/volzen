@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Volzen — EV Charging, Anytime",
+  title: "VOLZEN — EV Charging, Anytime",
   description: "Find homeowner charging slots near you. Airbnb for EV charging.",
 };
 

@@ -59,9 +59,8 @@ const ROW1 = TESTIMONIALS.slice(0, 5);
 const ROW2 = TESTIMONIALS.slice(5, 10);
 
 const PRIMARY_BTN: React.CSSProperties = {
-  background: "linear-gradient(135deg, #16a34a 0%, #064e3b 100%)",
+  background: "#111111",
   color: "#ffffff",
-  boxShadow: "0 4px 20px rgba(22,163,74,0.32)",
 };
 
 /* ── Page ─────────────────────────────────────────────────── */
@@ -74,8 +73,7 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 w-full" style={{ borderBottom: "1px solid var(--divider)", backdropFilter: "blur(16px)", background: "color-mix(in srgb, var(--bg) 80%, transparent)" }}>
         <nav className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto w-full">
           <div className="flex items-center gap-2">
-            <Zap size={20} fill="currentColor" style={{ color: "var(--accent)" }} />
-            <span className="font-bold text-lg tracking-tight" style={{ color: "var(--text)" }}>Volzen</span>
+            <span className="font-bold text-lg tracking-tight" style={{ color: "var(--text)" }}>VOLZEN</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -92,12 +90,8 @@ export default function LandingPage() {
 
       {/* ── Hero ─────────────────────────────────────────────── */}
       <section className="relative flex flex-col items-center justify-center text-center px-6 pt-24 pb-20 overflow-hidden">
-        <div className="absolute inset-0 flex items-start justify-center pointer-events-none" aria-hidden>
-          <div className="w-[500px] h-[500px] rounded-full opacity-[0.12] blur-[100px] mt-[-100px]" style={{ background: "var(--accent)" }} />
-        </div>
-
         <div className="relative z-10 max-w-2xl">
-          <h1 className="text-5xl sm:text-7xl font-bold leading-[1.06] tracking-tight mb-5" style={{ color: "var(--text)" }}>
+          <h1 className="text-5xl sm:text-7xl font-bold leading-[1.06] mb-5" style={{ color: "var(--text)", fontFamily: "var(--font-serif)", letterSpacing: "-0.03em" }}>
             Power up,<br />
             <span style={{ color: "var(--accent)" }}>anywhere you park.</span>
           </h1>
@@ -215,9 +209,7 @@ export default function LandingPage() {
       {/* ── CTA — host angle ─────────────────────────────────── */}
       <section className="max-w-3xl mx-auto w-full px-6 pb-24">
         <div className="p-10 text-center">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: "color-mix(in srgb, var(--accent) 15%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)" }}>
-            <Zap size={22} fill="currentColor" style={{ color: "var(--accent)" }} />
-          </div>
+
           <h2 className="text-2xl sm:text-3xl font-bold mb-3" style={{ color: "var(--text)" }}>Have a home charger?</h2>
           <p className="text-sm sm:text-base leading-relaxed mb-7 max-w-sm mx-auto" style={{ color: "var(--text-muted)" }}>
             Turn idle electricity into income. Set your own schedule and price.
@@ -251,14 +243,14 @@ export default function LandingPage() {
             className={`${bebas.className} select-none leading-none tracking-wide`}
             style={{
               fontSize: "clamp(5rem, 18vw, 13rem)",
-              background: "linear-gradient(135deg, #ffffff 0%, #4ade80 60%, #16a34a 100%)",
+              background: "linear-gradient(135deg, #ffffff 0%, #E8E5DF 60%, #BBBBBB 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
               mixBlendMode: "overlay",
             }}
           >
-            Volzen
+            VOLZEN
           </span>
 
           {/* Flat links */}
@@ -290,7 +282,7 @@ function TestimonialCard({ t }: { t: typeof TESTIMONIALS[0] }) {
       <p className="text-sm leading-6" style={{ color: "var(--text)" }}>&ldquo;{t.text}&rdquo;</p>
       <div className="flex items-center gap-3 mt-auto pt-2" style={{ borderTop: "1px solid var(--divider)" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={t.avatar} alt={t.name} className="w-8 h-8 rounded-full object-cover border" style={{ borderColor: "var(--glass-border)" }} width={32} height={32} />
+        <img src={t.avatar} alt={t.name} className="w-8 h-8 rounded-full object-cover border" style={{ borderColor: "var(--border)" }} width={32} height={32} />
         <div className="min-w-0">
           <p className="text-xs font-semibold truncate" style={{ color: "var(--text)" }}>{t.name}</p>
           <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{t.city}</p>

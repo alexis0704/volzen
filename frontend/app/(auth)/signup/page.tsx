@@ -1,91 +1,169 @@
 "use client";
-import { useState } from "react";
-import Link from "next/link";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Zap, Mail, Lock, User } from "lucide-react";
-import { Suspense } from "react";
+import { User, Mail, Lock, Eye, EyeOff, Car, House } from "lucide-react";
+import AuthLayout from "../_components/AuthLayout";
 
 type Role = "driver" | "provider";
+
+const ROLE_OPTIONS: { value: Role; label: string; icon: typeof Car }[] = [
+  { value: "driver", label: "Driver", icon: Car },
+  { value: "provider", label: "Host", icon: House },
+];
 
 function SignupForm() {
   const router = useRouter();
   const params = useSearchParams();
   const [role, setRole] = useState<Role>((params.get("role") as Role) ?? "driver");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    // Mock signup: drivers continue to the app flow, providers enter the host dashboard.
-    setTimeout(() => {
-      if (role === "driver") router.push("/onboarding");
-      else router.push("/provider-onboarding");
-    }, 1000);
+    await new Promise((r) => setTimeout(r, 1000));
+    if (role === "driver") router.push("/onboarding");
+    else router.push("/provider-onboarding");
   }
 
   return (
-    <div className="min-h-dvh flex items-center justify-center px-4" style={{ background: "var(--bg)" }}>
-      <div className="relative w-full max-w-sm">
-        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full opacity-15 blur-[80px] pointer-events-none" style={{ background: "#4ade80" }} aria-hidden />
-        <div className="glass p-8 relative">
-          <div className="flex items-center gap-2 mb-8">
-            <Zap className="text-green-400" size={20} fill="currentColor" />
-            <span className="font-bold text-lg" style={{ color: "var(--text)" }}>Volzen</span>
-          </div>
-          <h1 className="text-2xl font-bold mb-1" style={{ color: "var(--text)" }}>Create account</h1>
-          <p className="text-sm mb-5" style={{ color: "var(--text-muted)" }}>Join the green charging network</p>
-
-          {/* Role toggle */}
-          <div className="flex mb-5 p-1 rounded-xl gap-1" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(74,222,128,0.15)" }}>
-            {(["driver", "provider"] as Role[]).map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => setRole(r)}
-                className="flex-1 py-2 rounded-lg text-sm font-medium capitalize transition-all"
-                style={{
-                  background: role === r ? "var(--accent)" : "transparent",
-                  color: role === r ? "#0a0f0d" : "var(--text-muted)",
-                }}
-              >
-                {r === "driver" ? "🚗 Driver" : "🏠 Host"}
-              </button>
-            ))}
-          </div>
-
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium" style={{ color: "var(--text-muted)" }} htmlFor="name">Full name</label>
-              <div className="relative">
-                <User size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
-                <input id="name" type="text" autoComplete="name" required placeholder="Nguyen Van A" className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-green-400" style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(74,222,128,0.2)", color: "var(--text)" }} />
-              </div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium" style={{ color: "var(--text-muted)" }} htmlFor="email">Email</label>
-              <div className="relative">
-                <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
-                <input id="email" type="email" autoComplete="email" required placeholder="you@example.com" className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-green-400" style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(74,222,128,0.2)", color: "var(--text)" }} />
-              </div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium" style={{ color: "var(--text-muted)" }} htmlFor="password">Password</label>
-              <div className="relative">
-                <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
-                <input id="password" type="password" autoComplete="new-password" required placeholder="••••••••" minLength={8} className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-green-400" style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(74,222,128,0.2)", color: "var(--text)" }} />
-              </div>
-            </div>
-            <button type="submit" disabled={loading} className="mt-2 py-3 rounded-xl font-semibold text-sm transition-opacity hover:opacity-90 disabled:opacity-60" style={{ background: "var(--accent)", color: "#0a0f0d" }}>
-              {loading ? "Creating account…" : `Sign up as ${role}`}
-            </button>
-          </form>
-
-          <p className="text-sm text-center mt-5" style={{ color: "var(--text-muted)" }}>
-            Already have an account?{" "}
-            <Link href="/login" className="font-medium" style={{ color: "var(--accent)" }}>Sign in</Link>
-          </p>
-        </div>
+    <AuthLayout
+      title="Create account"
+      subtitle={"Join Vietnam\u2019s EV charging network"}
+      altHref="/login"
+      altLabel="Already have an account?"
+      altLinkText="Sign in"
+    >
+      {/* Role toggle */}
+      <div
+        className="flex p-1 rounded-xl gap-1 mb-6"
+        style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(74,222,128,0.12)" }}
+      >
+        {ROLE_OPTIONS.map(({ value, label, icon: Icon }) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setRole(value)}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium capitalize transition-all duration-200"
+            style={{
+              background: role === value ? "var(--accent)" : "transparent",
+              color: role === value ? "var(--accent-fg)" : "var(--text-muted)",
+            }}
+          >
+            <Icon size={15} />
+            {label}
+          </button>
+        ))}
       </div>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <Field label="Full name" htmlFor="name">
+          <User
+            size={15}
+            className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+            style={{ color: "var(--text-muted)" }}
+          />
+          <input
+            id="name"
+            type="text"
+            autoComplete="name"
+            required
+            placeholder="Nguyen Van A"
+            className="w-full h-10 pl-9 pr-4 rounded-xl text-sm outline-none transition-all duration-200 focus:ring-1 focus:ring-green-400"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(74,222,128,0.18)",
+              color: "var(--text)",
+            }}
+          />
+        </Field>
+
+        <Field label="Email" htmlFor="email">
+          <Mail
+            size={15}
+            className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+            style={{ color: "var(--text-muted)" }}
+          />
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            required
+            placeholder="you@example.com"
+            className="w-full h-10 pl-9 pr-4 rounded-xl text-sm outline-none transition-all duration-200 focus:ring-1 focus:ring-green-400"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(74,222,128,0.18)",
+              color: "var(--text)",
+            }}
+          />
+        </Field>
+
+        <Field label="Password" htmlFor="password">
+          <Lock
+            size={15}
+            className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+            style={{ color: "var(--text-muted)" }}
+          />
+          <input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            autoComplete="new-password"
+            required
+            minLength={8}
+            placeholder={"••••••••"}
+            className="w-full h-10 pl-9 pr-10 rounded-xl text-sm outline-none transition-all duration-200 focus:ring-1 focus:ring-green-400"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(74,222,128,0.18)",
+              color: "var(--text)",
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-70"
+            style={{ color: "var(--text-muted)" }}
+            tabIndex={-1}
+          >
+            {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+          </button>
+        </Field>
+        <p
+          className="text-xs -mt-1"
+          style={{ color: "color-mix(in srgb, var(--text-muted) 60%, transparent)" }}
+        >
+          At least 8 characters
+        </p>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="mt-1 h-11 rounded-xl font-semibold text-sm transition-all duration-200 hover:opacity-90 disabled:opacity-50 active:scale-[0.98]"
+          style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+        >
+          {loading ? "Creating account\u2026" : `Sign up as ${role}`}
+        </button>
+      </form>
+    </AuthLayout>
+  );
+}
+
+function Field({
+  label,
+  htmlFor,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-sm font-medium" style={{ color: "var(--text-muted)" }} htmlFor={htmlFor}>
+        {label}
+      </label>
+      <div className="relative">{children}</div>
     </div>
   );
 }
