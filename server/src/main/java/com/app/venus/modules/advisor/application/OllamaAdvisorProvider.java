@@ -7,36 +7,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.app.venus.modules.advisor.domain.AdvisorProvider;
-import com.app.venus.modules.advisor.infrastructure.AppAdvisorProperties;
-import com.app.venus.modules.advisor.infrastructure.OpenAiAdvisorModelClient;
+import com.app.venus.modules.advisor.infrastructure.OllamaAdvisorModelClient;
 import com.app.venus.modules.advisor.interfaces.dto.request.AdvisorChatRequest;
 import com.app.venus.modules.advisor.interfaces.dto.response.AdvisorChatResponse;
 import com.app.venus.modules.advisor.interfaces.dto.response.AdvisorRetrievedSourceResponse;
 
 @Service
-public class OpenAiAdvisorProvider implements AdvisorChatProvider {
-    private final AppAdvisorProperties properties;
+public class OllamaAdvisorProvider implements AdvisorChatProvider {
     private final AdvisorKnowledgeBase knowledgeBase;
     private final AdvisorGuardrailPromptBuilder guardrailPromptBuilder;
     private final AdvisorModelClient modelClient;
     private final AdvisorProviderOutputValidator outputValidator;
 
     @Autowired
-    public OpenAiAdvisorProvider(
-            AppAdvisorProperties properties,
+    public OllamaAdvisorProvider(
             AdvisorKnowledgeBase knowledgeBase,
             AdvisorGuardrailPromptBuilder guardrailPromptBuilder,
-            OpenAiAdvisorModelClient modelClient) {
-        this(properties, knowledgeBase, guardrailPromptBuilder, modelClient, new AdvisorProviderOutputValidator());
+            OllamaAdvisorModelClient modelClient) {
+        this(knowledgeBase, guardrailPromptBuilder, modelClient, new AdvisorProviderOutputValidator());
     }
 
-    OpenAiAdvisorProvider(
-            AppAdvisorProperties properties,
+    OllamaAdvisorProvider(
             AdvisorKnowledgeBase knowledgeBase,
             AdvisorGuardrailPromptBuilder guardrailPromptBuilder,
             AdvisorModelClient modelClient,
             AdvisorProviderOutputValidator outputValidator) {
-        this.properties = properties;
         this.knowledgeBase = knowledgeBase;
         this.guardrailPromptBuilder = guardrailPromptBuilder;
         this.modelClient = modelClient;
@@ -45,61 +40,51 @@ public class OpenAiAdvisorProvider implements AdvisorChatProvider {
 
     @Override
     public AdvisorProvider provider() {
-        return AdvisorProvider.OPENAI;
+        return AdvisorProvider.OLLAMA;
     }
 
     @Override
     public AdvisorChatResponse chat(AdvisorChatRequest request) {
-        AdvisorRetrievalResult retrieval = knowledgeBase.retrieve(request.message(), request.locationContext(), 6);
+        AdvisorRetrievalResult retrieval = knowledgeBase.retrieve(request.message(), request.locationContext(), 5);
         if (!retrieval.supported()) {
             return fallbackResponse(retrieval.snippets(), AdvisorContract.FALLBACK_ANSWER);
         }
 
         String systemPrompt = guardrailPromptBuilder.build(retrieval.snippets());
-        String userPrompt = userPrompt(request, retrieval);
-
+        String prompt = userPrompt(request, retrieval);
         try {
             return outputValidator.validate(
-                    modelClient.completeJson(userPrompt, systemPrompt),
+                    modelClient.completeJson(prompt, systemPrompt),
                     retrieval.snippets(),
-                    AdvisorProvider.OPENAI);
+                    AdvisorProvider.OLLAMA);
         } catch (RuntimeException firstFailure) {
-            return retryOrFallback(request, retrieval, systemPrompt, firstFailure);
+            return retryOrFallback(request, retrieval, systemPrompt);
         }
     }
 
     private AdvisorChatResponse retryOrFallback(
             AdvisorChatRequest request,
             AdvisorRetrievalResult retrieval,
-            String systemPrompt,
-            RuntimeException firstFailure) {
+            String systemPrompt) {
         try {
             String strictPrompt = userPrompt(request, retrieval)
-                    + "\nReturn only valid JSON. Use only retrieved sourceIds. Do not add markdown.";
+                    + "\nReturn only valid JSON. Use only sourceIds from local retrieved snippets. Do not add markdown.";
             return outputValidator.validate(
                     modelClient.completeJson(strictPrompt, systemPrompt),
                     retrieval.snippets(),
-                    AdvisorProvider.OPENAI);
+                    AdvisorProvider.OLLAMA);
         } catch (RuntimeException secondFailure) {
             return fallbackResponse(retrieval.snippets(), AdvisorContract.FALLBACK_ANSWER);
         }
     }
 
     private String userPrompt(AdvisorChatRequest request, AdvisorRetrievalResult retrieval) {
-        String retrievalMode = properties.hasOpenAiVectorStore()
-                ? "OpenAI hosted retrieval may be used with vectorStoreId configured on the server."
-                : "OpenAI hosted retrieval is not configured; use the provided local retrieved snippets.";
         return """
                 Question: %s
-                Provider mode: %s
-                Preferred model: %s
+                Provider mode: local/demo Ollama retrieval only; do not claim live web knowledge.
                 Output fields: answer, sourceIds, grounded, needsProfessionalReview, dataAsOf, provider, unsupportedReason.
-                Retrieved source count: %d
-                """.formatted(
-                request.message(),
-                retrievalMode,
-                properties.getOpenai().getModel(),
-                retrieval.snippets().size());
+                Use only the %d top local snippets supplied in the system prompt.
+                """.formatted(request.message(), retrieval.snippets().size());
     }
 
     private AdvisorChatResponse fallbackResponse(List<AdvisorKnowledgeSnippet> snippets, String reason) {
@@ -114,7 +99,7 @@ public class OpenAiAdvisorProvider implements AdvisorChatProvider {
                 false,
                 false,
                 dataAsOf,
-                AdvisorProvider.OPENAI,
+                AdvisorProvider.OLLAMA,
                 reason);
     }
 
