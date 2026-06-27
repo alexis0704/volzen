@@ -90,7 +90,7 @@ public final class OrderResponses {
         static ProviderSummaryResponse from(Station station) {
             return new ProviderSummaryResponse(
                     station.getId(),
-                    station.getProvider().getFullName(),
+                    station.getName(),
                     station.getAddress(),
                     station.getLat(),
                     station.getLng(),
@@ -107,7 +107,7 @@ public final class OrderResponses {
         static ProviderCompactResponse from(Station station) {
             return new ProviderCompactResponse(
                     station.getId(),
-                    station.getProvider().getFullName(),
+                    station.getName(),
                     station.getAddress(),
                     station.getProvider().getAvatarUrl());
         }

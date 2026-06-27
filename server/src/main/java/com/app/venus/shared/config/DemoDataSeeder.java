@@ -12,7 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.app.venus.modules.order.domain.Order;
 import com.app.venus.modules.order.infrastructure.OrderRepository;
+import com.app.venus.modules.provider.domain.BlockReason;
+import com.app.venus.modules.provider.domain.BlockedSlot;
 import com.app.venus.modules.provider.domain.Station;
+import com.app.venus.modules.provider.infrastructure.BlockedSlotRepository;
 import com.app.venus.modules.provider.infrastructure.StationRepository;
 import com.app.venus.modules.review.domain.Review;
 import com.app.venus.modules.review.infrastructure.ReviewRepository;
@@ -32,6 +35,7 @@ public class DemoDataSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final VehicleRepository vehicleRepository;
     private final StationRepository stationRepository;
+    private final BlockedSlotRepository blockedSlotRepository;
     private final OrderRepository orderRepository;
     private final ReviewRepository reviewRepository;
 
@@ -39,11 +43,13 @@ public class DemoDataSeeder implements CommandLineRunner {
             UserRepository userRepository,
             VehicleRepository vehicleRepository,
             StationRepository stationRepository,
+            BlockedSlotRepository blockedSlotRepository,
             OrderRepository orderRepository,
             ReviewRepository reviewRepository) {
         this.userRepository = userRepository;
         this.vehicleRepository = vehicleRepository;
         this.stationRepository = stationRepository;
+        this.blockedSlotRepository = blockedSlotRepository;
         this.orderRepository = orderRepository;
         this.reviewRepository = reviewRepository;
     }
@@ -151,6 +157,13 @@ public class DemoDataSeeder implements CommandLineRunner {
                 22000,
                 OrderStatus.CONFIRMED);
 
+        blockedSlot(
+                "blk_demo_p1_maintenance",
+                stationOne,
+                "2026-06-29T10:00:00+07:00",
+                "2026-06-29T12:00:00+07:00",
+                BlockReason.MAINTENANCE);
+
         orderRepository.save(confirmed);
     }
 
@@ -235,6 +248,18 @@ public class DemoDataSeeder implements CommandLineRunner {
             return;
         }
         reviewRepository.save(new Review(id, order, station, author, rating, comment));
+    }
+
+    private void blockedSlot(String id, Station station, String start, String end, BlockReason reason) {
+        if (blockedSlotRepository.existsById(id)) {
+            return;
+        }
+        blockedSlotRepository.save(new BlockedSlot(
+                id,
+                station,
+                OffsetDateTime.parse(start),
+                OffsetDateTime.parse(end),
+                reason));
     }
 
     private BigDecimal duration(String start, String end) {

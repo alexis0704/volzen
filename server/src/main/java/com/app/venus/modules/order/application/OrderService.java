@@ -101,7 +101,7 @@ public class OrderService {
                 price.subtotal(),
                 price.serviceFee(),
                 price.total(),
-                OrderStatus.CONFIRMED);
+                OrderStatus.PENDING);
 
         return orderRepository.saveAndFlush(order);
     }

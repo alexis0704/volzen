@@ -8,6 +8,7 @@ import com.app.venus.modules.user.domain.User;
 import com.app.venus.modules.vehicle.domain.Vehicle;
 import com.app.venus.shared.auditing.Auditable;
 import com.app.venus.shared.domain.OrderStatus;
+import com.app.venus.shared.exception.InvalidStatusTransitionException;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -141,5 +142,23 @@ public class Order extends Auditable {
 
     public void cancel() {
         this.status = OrderStatus.CANCELLED;
+    }
+
+    public void transitionByProvider(OrderStatus nextStatus) {
+        if (status == OrderStatus.PENDING
+                && (nextStatus == OrderStatus.CONFIRMED || nextStatus == OrderStatus.CANCELLED)) {
+            this.status = nextStatus;
+            return;
+        }
+        if (status == OrderStatus.CONFIRMED && nextStatus == OrderStatus.ACTIVE) {
+            this.status = nextStatus;
+            return;
+        }
+        if (status == OrderStatus.ACTIVE && nextStatus == OrderStatus.COMPLETED) {
+            this.status = nextStatus;
+            return;
+        }
+        throw new InvalidStatusTransitionException(
+                "Cannot transition from '%s' to '%s'.".formatted(status.getValue(), nextStatus.getValue()));
     }
 }

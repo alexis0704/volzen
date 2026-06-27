@@ -23,9 +23,22 @@ public interface OrderRepository extends JpaRepository<Order, String> {
             OrderStatus status,
             Pageable pageable);
 
+    List<Order> findByProviderStationProviderIdOrderByCreatedInstantDesc(String providerId, Pageable pageable);
+
+    List<Order> findByProviderStationProviderIdAndStatusOrderByCreatedInstantDesc(
+            String providerId,
+            OrderStatus status,
+            Pageable pageable);
+
     long countByDriverId(String driverId);
 
     long countByDriverIdAndStatus(String driverId, OrderStatus status);
+
+    long countByProviderStationProviderId(String providerId);
+
+    long countByProviderStationProviderIdAndStatus(String providerId, OrderStatus status);
+
+    Optional<Order> findByIdAndProviderStationProviderId(String id, String providerId);
 
     @Query("""
             select count(orderEntity) > 0

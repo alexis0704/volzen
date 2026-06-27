@@ -148,7 +148,7 @@ class OrderControllerTests {
                 .andExpect(jsonPath("$.subtotal").value(50000))
                 .andExpect(jsonPath("$.serviceFee").value(5000))
                 .andExpect(jsonPath("$.total").value(55000))
-                .andExpect(jsonPath("$.status").value("confirmed"))
+                .andExpect(jsonPath("$.status").value("pending"))
                 .andExpect(jsonPath("$.provider.name").value("Minh Tuan"));
     }
 
