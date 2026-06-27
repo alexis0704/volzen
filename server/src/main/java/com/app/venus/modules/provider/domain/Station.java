@@ -36,6 +36,9 @@ public class Station extends Auditable {
     private User provider;
 
     @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
     private String address;
 
     @Column(nullable = false, precision = 10, scale = 7)
@@ -82,8 +85,35 @@ public class Station extends Auditable {
             Set<Amenity> amenities,
             List<String> photoUrls,
             boolean available) {
+        this(
+                id,
+                provider,
+                provider.getFullName(),
+                address,
+                lat,
+                lng,
+                pricePerHour,
+                connectorTypes,
+                amenities,
+                photoUrls,
+                available);
+    }
+
+    public Station(
+            String id,
+            User provider,
+            String name,
+            String address,
+            BigDecimal lat,
+            BigDecimal lng,
+            int pricePerHour,
+            Set<ConnectorType> connectorTypes,
+            Set<Amenity> amenities,
+            List<String> photoUrls,
+            boolean available) {
         this.id = id;
         this.provider = provider;
+        this.name = name;
         this.address = address;
         this.lat = lat;
         this.lng = lng;
@@ -100,6 +130,10 @@ public class Station extends Auditable {
 
     public User getProvider() {
         return provider;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getAddress() {
@@ -132,5 +166,26 @@ public class Station extends Auditable {
 
     public boolean isAvailable() {
         return available;
+    }
+
+    public void update(
+            String name,
+            String address,
+            BigDecimal lat,
+            BigDecimal lng,
+            int pricePerHour,
+            Set<ConnectorType> connectorTypes,
+            Set<Amenity> amenities,
+            List<String> photoUrls,
+            boolean available) {
+        this.name = name;
+        this.address = address;
+        this.lat = lat;
+        this.lng = lng;
+        this.pricePerHour = pricePerHour;
+        this.connectorTypes = new LinkedHashSet<>(connectorTypes);
+        this.amenities = new LinkedHashSet<>(amenities);
+        this.photoUrls = new ArrayList<>(photoUrls);
+        this.available = available;
     }
 }

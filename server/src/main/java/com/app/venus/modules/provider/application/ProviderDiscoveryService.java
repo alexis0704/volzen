@@ -117,7 +117,7 @@ public class ProviderDiscoveryService {
 
         return new ProviderSummary(
                 station.getId(),
-                station.getProvider().getFullName(),
+                station.getName(),
                 station.getProvider().getAvatarUrl(),
                 station.getAddress(),
                 station.getLat(),

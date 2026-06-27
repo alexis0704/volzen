@@ -66,6 +66,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         Station stationOne = station(
                 "pvd_p1",
                 providerOne,
+                "Nguyen Hue Home Charger",
                 "12 Nguyen Hue, District 1, Ho Chi Minh City",
                 "10.7769000",
                 "106.7009000",
@@ -79,6 +80,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         Station stationTwo = station(
                 "pvd_p2",
                 providerTwo,
+                "Le Loi Type 2 Bay",
                 "48 Le Loi, District 1, Ho Chi Minh City",
                 "10.7731000",
                 "106.7002000",
@@ -90,6 +92,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         Station stationThree = station(
                 "pvd_p3",
                 providerThree,
+                "Thu Duc Fast Charge",
                 "88 Xa Lo Ha Noi, Thu Duc City, Ho Chi Minh City",
                 "10.8024000",
                 "106.7147000",
@@ -178,6 +181,7 @@ public class DemoDataSeeder implements CommandLineRunner {
     private Station station(
             String id,
             User provider,
+            String name,
             String address,
             String lat,
             String lng,
@@ -190,6 +194,7 @@ public class DemoDataSeeder implements CommandLineRunner {
                 .orElseGet(() -> stationRepository.save(new Station(
                         id,
                         provider,
+                        name,
                         address,
                         new BigDecimal(lat),
                         new BigDecimal(lng),

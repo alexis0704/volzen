@@ -56,6 +56,7 @@ class StationRepositoryTests {
         Station station = new Station(
                 "pvd_station_test",
                 provider,
+                "Station Test Charger",
                 "12 Nguyen Hue, District 1, Ho Chi Minh City",
                 new BigDecimal("10.7769000"),
                 new BigDecimal("106.7009000"),
@@ -66,13 +67,51 @@ class StationRepositoryTests {
                 true);
         stationRepository.saveAndFlush(station);
 
-        List<Station> candidates = stationRepository.findSearchCandidates(ConnectorType.CCS, 30000);
+        List<Station> candidates = stationRepository.findSearchCandidatesByConnectorType(ConnectorType.CCS, 30000);
 
         assertThat(candidates).extracting(Station::getId).contains("pvd_station_test");
         Station persisted = stationRepository.findByIdAndAvailableTrue("pvd_station_test").orElseThrow();
+        assertThat(persisted.getName()).isEqualTo("Station Test Charger");
         assertThat(persisted.getConnectorTypes()).containsExactlyInAnyOrder(ConnectorType.CCS, ConnectorType.TYPE_2);
         assertThat(persisted.getAmenities()).containsExactlyInAnyOrder(Amenity.COFFEE, Amenity.WIFI);
         assertThat(persisted.getPhotoUrls()).containsExactly("https://cdn.volzen.vn/stations/pvd_station_test/photo_1.jpg");
+        assertThat(stationRepository.findByProviderId(provider.getId())).isPresent();
+    }
+
+    @Test
+    void updatesStationProfileFields() {
+        Station station = stationRepository.saveAndFlush(new Station(
+                "pvd_station_update",
+                provider,
+                "Old Charger",
+                "Old Address",
+                new BigDecimal("10.7000000"),
+                new BigDecimal("106.6000000"),
+                20000,
+                Set.of(ConnectorType.TYPE_2),
+                Set.of(Amenity.PARKING),
+                List.of("https://cdn.volzen.vn/old.jpg"),
+                false));
+
+        station.update(
+                "Updated Charger",
+                "Updated Address",
+                new BigDecimal("10.7769000"),
+                new BigDecimal("106.7009000"),
+                42000,
+                Set.of(ConnectorType.CCS),
+                Set.of(Amenity.COFFEE, Amenity.WIFI),
+                List.of("https://cdn.volzen.vn/new.jpg"),
+                true);
+        stationRepository.saveAndFlush(station);
+
+        Station updated = stationRepository.findById("pvd_station_update").orElseThrow();
+        assertThat(updated.getName()).isEqualTo("Updated Charger");
+        assertThat(updated.getPricePerHour()).isEqualTo(42000);
+        assertThat(updated.getConnectorTypes()).containsExactly(ConnectorType.CCS);
+        assertThat(updated.getAmenities()).containsExactlyInAnyOrder(Amenity.COFFEE, Amenity.WIFI);
+        assertThat(updated.getPhotoUrls()).containsExactly("https://cdn.volzen.vn/new.jpg");
+        assertThat(updated.isAvailable()).isTrue();
     }
 
     @Test
