@@ -33,6 +33,16 @@
       "demandPotentialLabel": "medium proxy potential",
       "sourceId": "VOLZEN-LOCATION-SIGNALS-001",
       "claimType": "internal/pilot"
+    },
+    {
+      "id": "hcmc-d7-mixed-use",
+      "city": "Ho Chi Minh City",
+      "district": "District 7",
+      "siteTypeSignals": ["apartment", "mall", "office", "international school"],
+      "longStayParkingPotential": "medium",
+      "demandPotentialLabel": "medium proxy potential",
+      "sourceId": "VOLZEN-LOCATION-SIGNALS-001",
+      "claimType": "internal/pilot"
     }
   ]
 }

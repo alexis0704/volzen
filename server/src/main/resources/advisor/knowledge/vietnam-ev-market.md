@@ -26,6 +26,18 @@ Verified market facts, industry reporting, and internal assumptions are separate
   date: 2026-06-28
   note: For MVP demos, long-stay parking near apartments, offices, malls, airports, and ride-hailing pickup areas is treated as a proxy demand signal.
 
+- id: market-hotel-partner-onboarding
+  sourceId: VOLZEN-PILOT-002
+  claimType: internal/pilot
+  date: 2026-06-28
+  note: Hotel partner onboarding should start with parking permission, guest or driver access rules, charger placement, operating hours, host contact flow, and clear pricing responsibility.
+
+- id: market-connector-recommendation
+  sourceId: VOLZEN-PILOT-003
+  claimType: internal/pilot
+  date: 2026-06-28
+  note: MVP connector recommendations should ask which driver vehicles are targeted first; CCS and Type 2 coverage are useful default discussion points, but final charger selection needs technical review.
+
 ## Sources
 
 - sourceId: VN-MARKET-001
@@ -42,6 +54,18 @@ Verified market facts, industry reporting, and internal assumptions are separate
 
 - sourceId: VOLZEN-PILOT-001
   title: Volzen MVP location-demand proxy assumptions
+  url: internal
+  lastReviewed: 2026-06-28
+  sourceType: internal/pilot
+
+- sourceId: VOLZEN-PILOT-002
+  title: Volzen MVP host onboarding assumptions
+  url: internal
+  lastReviewed: 2026-06-28
+  sourceType: internal/pilot
+
+- sourceId: VOLZEN-PILOT-003
+  title: Volzen MVP connector recommendation assumptions
   url: internal
   lastReviewed: 2026-06-28
   sourceType: internal/pilot
