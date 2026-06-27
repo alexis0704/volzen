@@ -5,6 +5,9 @@ server/.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Local planning ###
+steering/
+
 ### Frontend / Node ###
 node_modules/
 .pnp
