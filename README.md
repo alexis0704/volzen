@@ -74,6 +74,18 @@ cd server
 SERVER_PORT=8081 ./mvnw spring-boot:run
 ```
 
+## MVP Backend Mode
+
+This branch intentionally uses a no-auth backend for the MVP. Driver endpoints resolve the current user through `DemoCurrentUserService` instead of a JWT/session principal.
+
+Fixed demo current user:
+
+```text
+usr_demo_driver
+```
+
+This is deliberate for hackathon/demo speed. Production auth is deferred and should replace `DemoCurrentUserService` with authenticated principal lookup.
+
 ## H2 Console
 
 The H2 console is enabled for local development:
@@ -88,6 +100,42 @@ Default connection:
 JDBC URL: jdbc:h2:mem:venus
 User: username
 Password: password
+```
+
+## Demo Seed Data
+
+Demo data is enabled by default:
+
+```properties
+app.seed.demo-data=true
+```
+
+Fresh H2 startup seeds:
+
+* demo driver `usr_demo_driver`
+* demo vehicle `veh_demo_vf8`
+* three provider station records in Ho Chi Minh City
+* connector coverage for Type 2, CCS, and CHAdeMO
+* amenities and photo URLs
+* confirmed and completed demo orders
+* reviews for provider detail pages
+
+Important seeded IDs include:
+
+```text
+pvd_p1
+pvd_p2
+pvd_p3
+ord_demo_confirmed
+ord_demo_completed_1
+ord_demo_completed_2
+ord_demo_reviewable
+```
+
+Seeding is idempotent across restarts and can be disabled for tests or special local runs:
+
+```bash
+APP_SEED_DEMO_DATA=false ./mvnw spring-boot:run
 ```
 
 ## AI Provider Setup
@@ -179,6 +227,74 @@ POST /api/ai
 ```
 
 All API responses use the shared response wrapper.
+
+## Current MVP Product Endpoints
+
+These endpoints are intentionally no-auth for now and operate as the fixed demo driver:
+
+```text
+GET   /api/v1/me
+PATCH /api/v1/me
+GET   /api/v1/me/vehicles
+POST  /api/v1/me/vehicles
+PATCH /api/v1/me/vehicles/{vehicleId}
+DELETE /api/v1/me/vehicles/{vehicleId}
+
+GET   /api/v1/providers
+GET   /api/v1/providers/{providerId}
+GET   /api/v1/providers/{providerId}/availability
+
+POST  /api/v1/orders
+GET   /api/v1/orders/{orderId}
+GET   /api/v1/me/orders
+PATCH /api/v1/orders/{orderId}/cancel
+POST  /api/v1/orders/{orderId}/review
+```
+
+Order creation validates provider availability, vehicle ownership, connector compatibility, time range, and slot overlap. Overlapping booking attempts return `409 SLOT_UNAVAILABLE`.
+
+## Frontend Contract Notes
+
+The current Next.js frontend is still mock-driven and has not been wired to these backend APIs yet.
+
+The frontend mock model uses UI-friendly field names:
+
+```text
+avatar
+connectors
+photos
+reviews[].author
+reviews[].avatar
+reviews[].text
+reviews[].date
+```
+
+The backend follows `API_SPEC.md` names:
+
+```text
+avatarUrl
+connectorTypes
+photoUrls
+reviews[].authorName
+reviews[].authorAvatarUrl
+reviews[].comment
+reviews[].createdAt
+```
+
+When frontend API integration starts, add a small adapter in the frontend or add harmless alias fields deliberately. No frontend API integration was implemented in this backend task.
+
+## Deferred MVP Work
+
+The following work is intentionally deferred:
+
+* real backend authentication with JWT/session handling
+* replacing the fixed demo current user
+* provider dashboard APIs and provider-owned station management
+* technician workflows
+* real payment processing
+* automatic order status transitions
+* frontend API integration
+* production database profile and geospatial indexing
 
 ## Building A Product Module
 

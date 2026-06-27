@@ -125,6 +125,15 @@ public class DemoDataSeeder implements CommandLineRunner {
                 "2026-06-21T15:30:00+07:00",
                 30000,
                 OrderStatus.COMPLETED);
+        order(
+                "ord_demo_reviewable",
+                stationTwo,
+                vehicle,
+                driver,
+                "2026-06-22T16:00:00+07:00",
+                "2026-06-22T17:00:00+07:00",
+                22000,
+                OrderStatus.COMPLETED);
 
         review("rev_demo_p1", completedOne, stationOne, driver, 5, "Great host, fast charger, highly recommend.");
         review("rev_demo_p3", completedTwo, stationThree, driver, 4, "Easy to find and reliable charging.");
