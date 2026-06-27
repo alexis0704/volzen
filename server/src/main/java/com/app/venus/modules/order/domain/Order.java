@@ -138,4 +138,8 @@ public class Order extends Auditable {
     public OrderStatus getStatus() {
         return status;
     }
+
+    public void cancel() {
+        this.status = OrderStatus.CANCELLED;
+    }
 }

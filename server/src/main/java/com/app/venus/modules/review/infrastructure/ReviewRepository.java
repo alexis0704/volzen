@@ -20,4 +20,6 @@ public interface ReviewRepository extends JpaRepository<Review, String> {
     Double averageRatingByProviderStation(@Param("providerStation") Station providerStation);
 
     Optional<Review> findByOrder(Order order);
+
+    boolean existsByOrder(Order order);
 }

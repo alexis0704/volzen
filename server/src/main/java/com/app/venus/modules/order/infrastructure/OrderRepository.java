@@ -23,6 +23,10 @@ public interface OrderRepository extends JpaRepository<Order, String> {
             OrderStatus status,
             Pageable pageable);
 
+    long countByDriverId(String driverId);
+
+    long countByDriverIdAndStatus(String driverId, OrderStatus status);
+
     @Query("""
             select count(orderEntity) > 0
             from ChargingOrder orderEntity
