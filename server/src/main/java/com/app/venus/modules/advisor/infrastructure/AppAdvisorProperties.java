@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 public class AppAdvisorProperties {
     private String provider = "openai";
     private int timeoutSeconds = 60;
+    private boolean requestProviderOverrideEnabled = false;
     private OpenAi openai = new OpenAi();
 
     public String getProvider() {
@@ -24,6 +25,14 @@ public class AppAdvisorProperties {
 
     public void setTimeoutSeconds(int timeoutSeconds) {
         this.timeoutSeconds = timeoutSeconds;
+    }
+
+    public boolean isRequestProviderOverrideEnabled() {
+        return requestProviderOverrideEnabled;
+    }
+
+    public void setRequestProviderOverrideEnabled(boolean requestProviderOverrideEnabled) {
+        this.requestProviderOverrideEnabled = requestProviderOverrideEnabled;
     }
 
     public OpenAi getOpenai() {
