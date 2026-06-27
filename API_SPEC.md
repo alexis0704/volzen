@@ -6,95 +6,7 @@ All monetary values are in **Vietnamese Dong (VND)**, represented as integers.
 Coordinates are **decimal degrees** (WGS84).  
 Timestamps are **ISO 8601** strings (`2026-06-27T09:00:00+07:00`).
 
----
-
-## Authentication
-
-### `POST /api/v1/auth/signup`
-
-Register a new account.
-
-**Request**
-```json
-{
-  "fullName": "Nguyen Van A",
-  "email": "user@example.com",
-  "password": "minimum8chars",
-  "role": "driver" // "driver" | "provider"
-}
-```
-
-**Response `201`**
-```json
-{
-  "user": {
-    "id": "usr_01j9x",
-    "fullName": "Nguyen Van A",
-    "email": "user@example.com",
-    "role": "driver",
-    "createdAt": "2026-06-27T08:00:00+07:00"
-  },
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refreshToken": "dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4..."
-}
-```
-
----
-
-### `POST /api/v1/auth/login`
-
-**Request**
-```json
-{
-  "email": "user@example.com",
-  "password": "minimum8chars"
-}
-```
-
-**Response `200`**
-```json
-{
-  "user": {
-    "id": "usr_01j9x",
-    "fullName": "Nguyen Van A",
-    "email": "user@example.com",
-    "role": "driver",
-    "createdAt": "2026-06-27T08:00:00+07:00"
-  },
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refreshToken": "dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4..."
-}
-```
-
----
-
-### `POST /api/v1/auth/refresh`
-
-Exchange a refresh token for a new access token.
-
-**Request**
-```json
-{
-  "refreshToken": "dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4..."
-}
-```
-
-**Response `200`**
-```json
-{
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
-
----
-
-### `POST /api/v1/auth/logout`
-
-Invalidate the current refresh token. Requires `Authorization: Bearer <accessToken>`.
-
-**Request** _(empty body)_
-
-**Response `204`** _(no body)_
+> **Prototype note:** Auth is stubbed. All endpoints assume a hardcoded current user — no `Authorization` header required. Skip signup/login for now.
 
 ---
 
@@ -102,7 +14,7 @@ Invalidate the current refresh token. Requires `Authorization: Bearer <accessTok
 
 ### `GET /api/v1/me`
 
-Fetch the authenticated user's profile. Requires auth.
+Fetch the current user's profile.
 
 **Response `200`**
 ```json
@@ -120,7 +32,7 @@ Fetch the authenticated user's profile. Requires auth.
 
 ### `PATCH /api/v1/me`
 
-Update name or avatar. Requires auth.
+Update name or avatar.
 
 **Request**
 ```json
@@ -138,7 +50,7 @@ Update name or avatar. Requires auth.
 
 ### `GET /api/v1/me/vehicles`
 
-List all vehicles registered to the authenticated driver.
+List all vehicles registered to the current driver.
 
 **Response `200`**
 ```json
@@ -176,7 +88,7 @@ Add a new vehicle.
   "brand": "VinFast",
   "model": "VF8",
   "year": 2024,
-  "connectorType": "CCS" // "Type 1" | "Type 2" | "CCS" | "CHAdeMO"
+  "connectorType": "CCS"
 }
 ```
 
@@ -234,7 +146,7 @@ Search for providers near a location. Used by the map and list on the Explore sc
 | `lat` | float | yes | Centre latitude |
 | `lng` | float | yes | Centre longitude |
 | `radiusKm` | float | no | Search radius in km (default: `5`) |
-| `connectorType` | string | no | Filter by connector: `Type 1`, `Type 2`, `CCS`, `CHAdeMO` |
+| `connectorType` | string | no | Filter: `Type 1`, `Type 2`, `CCS`, `CHAdeMO` |
 | `maxPricePerHour` | int | no | Upper price bound (VND) |
 | `limit` | int | no | Max results (default: `20`, max: `50`) |
 | `offset` | int | no | Pagination offset (default: `0`) |
@@ -258,8 +170,7 @@ Search for providers near a location. Used by the map and list on the Explore sc
       "connectorTypes": ["Type 2", "CCS"],
       "amenities": ["Coffee", "WiFi", "Air Conditioning", "Restroom"],
       "photoUrls": [
-        "https://cdn.volzen.vn/stations/pvd_p1/photo_1.jpg",
-        "https://cdn.volzen.vn/stations/pvd_p1/photo_2.jpg"
+        "https://cdn.volzen.vn/stations/pvd_p1/photo_1.jpg"
       ],
       "isAvailable": true
     }
@@ -271,7 +182,7 @@ Search for providers near a location. Used by the map and list on the Explore sc
 
 ### `GET /api/v1/providers/:providerId`
 
-Fetch full provider detail including reviews. Used by the Provider Detail screen.
+Full provider detail including reviews. Used by the Provider Detail screen.
 
 **Response `200`**
 ```json
@@ -310,7 +221,7 @@ Fetch full provider detail including reviews. Used by the Provider Detail screen
 
 ### `GET /api/v1/providers/:providerId/availability`
 
-Return the provider's booked time slots for a given date so the frontend can block them out in the time picker.
+Booked time slots for a given date. Used by the order time picker to block unavailable slots.
 
 **Query parameters**
 
@@ -341,7 +252,7 @@ Return the provider's booked time slots for a given date so the frontend can blo
 
 ### `POST /api/v1/orders`
 
-Create a new order (booking). Triggers payment processing. Requires auth.
+Create a new booking.
 
 **Request**
 ```json
@@ -367,7 +278,7 @@ Create a new order (booking). Triggers payment processing. Requires auth.
   "subtotal": 50000,
   "serviceFee": 5000,
   "total": 55000,
-  "status": "confirmed", // "pending" | "confirmed" | "active" | "completed" | "cancelled"
+  "status": "confirmed",
   "createdAt": "2026-06-27T08:30:00+07:00",
   "provider": {
     "id": "pvd_p1",
@@ -380,7 +291,7 @@ Create a new order (booking). Triggers payment processing. Requires auth.
 }
 ```
 
-**Error `409`** — time slot already booked
+**Error `409`** — slot already booked
 ```json
 {
   "error": "SLOT_UNAVAILABLE",
@@ -400,13 +311,13 @@ Fetch a single order. Used by the Order Confirmation and Route screens.
 
 ### `GET /api/v1/me/orders`
 
-List all orders for the authenticated driver.
+List all orders for the current driver.
 
 **Query parameters**
 
 | Param | Type | Description |
 |---|---|---|
-| `status` | string | Filter by status (see status enum above) |
+| `status` | string | Filter by status (see status enum below) |
 | `limit` | int | Default `20` |
 | `offset` | int | Default `0` |
 
@@ -438,16 +349,11 @@ List all orders for the authenticated driver.
 
 ### `PATCH /api/v1/orders/:orderId/cancel`
 
-Cancel an order. Driver-initiated. Returns `403` if the order is already `active` or `completed`.
-
-**Request** _(empty body)_
+Driver cancels an order. Returns `403` if status is already `active` or `completed`.
 
 **Response `200`**
 ```json
-{
-  "id": "ord_xyz9",
-  "status": "cancelled"
-}
+{ "id": "ord_xyz9", "status": "cancelled" }
 ```
 
 ---
@@ -456,12 +362,12 @@ Cancel an order. Driver-initiated. Returns `403` if the order is already `active
 
 ### `POST /api/v1/orders/:orderId/review`
 
-Submit a review after an order is `completed`. One review per order. Requires auth.
+Submit a review after an order is `completed`. One review per order.
 
 **Request**
 ```json
 {
-  "rating": 5,        // integer 1–5
+  "rating": 5,
   "comment": "Great host, fast charger, highly recommend."
 }
 ```
@@ -486,22 +392,22 @@ Submit a review after an order is `completed`. One review per order. Requires au
 
 ### `GET /api/v1/me/station`
 
-Fetch the authenticated provider's station profile.
+Fetch the current provider's station profile.
 
 **Response `200`**
 ```json
 {
   "id": "pvd_p1",
+  "name": "Tram sac Minh Tuan",
   "address": "12 Nguyen Hue, District 1, Ho Chi Minh City",
   "lat": 10.7769,
   "lng": 106.7009,
   "pricePerHour": 25000,
   "connectorTypes": ["Type 2", "CCS"],
   "amenities": ["Coffee", "WiFi", "Air Conditioning", "Restroom"],
-  "photoUrls": [
-    "https://cdn.volzen.vn/stations/pvd_p1/photo_1.jpg"
-  ],
-  "isAvailable": true
+  "photoUrls": ["https://cdn.volzen.vn/stations/pvd_p1/photo_1.jpg"],
+  "isAvailable": true,
+  "status": "Active"
 }
 ```
 
@@ -509,20 +415,19 @@ Fetch the authenticated provider's station profile.
 
 ### `PUT /api/v1/me/station`
 
-Create or fully update the provider's station. Requires auth as `provider` role.
+Create or fully update the provider's station.
 
 **Request**
 ```json
 {
+  "name": "Tram sac Minh Tuan",
   "address": "12 Nguyen Hue, District 1, Ho Chi Minh City",
   "lat": 10.7769,
   "lng": 106.7009,
   "pricePerHour": 25000,
   "connectorTypes": ["Type 2", "CCS"],
   "amenities": ["Coffee", "WiFi", "Air Conditioning", "Restroom"],
-  "photoUrls": [
-    "https://cdn.volzen.vn/stations/pvd_p1/photo_1.jpg"
-  ],
+  "photoUrls": ["https://cdn.volzen.vn/stations/pvd_p1/photo_1.jpg"],
   "isAvailable": true
 }
 ```
@@ -533,9 +438,15 @@ Create or fully update the provider's station. Requires auth as `provider` role.
 
 ### `GET /api/v1/me/station/orders`
 
-List incoming bookings for the authenticated provider.
+List incoming bookings for the current provider. Used by the Bookings screen.
 
-**Query parameters** — same as `GET /api/v1/me/orders`
+**Query parameters**
+
+| Param | Type | Description |
+|---|---|---|
+| `status` | string | Filter by status |
+| `limit` | int | Default `20` |
+| `offset` | int | Default `0` |
 
 **Response `200`**
 ```json
@@ -546,6 +457,7 @@ List incoming bookings for the authenticated provider.
       "id": "ord_xyz9",
       "startTime": "2026-06-28T09:00:00+07:00",
       "endTime": "2026-06-28T11:00:00+07:00",
+      "durationHours": 2.0,
       "total": 55000,
       "status": "confirmed",
       "driver": {
@@ -556,10 +468,163 @@ List incoming bookings for the authenticated provider.
       "vehicle": {
         "brand": "VinFast",
         "model": "VF8",
-        "connectorType": "CCS"
+        "connectorType": "CCS",
+        "plate": "51A-123.45",
+        "batteryPercent": 24
       }
     }
   ]
+}
+```
+
+---
+
+### `PATCH /api/v1/me/station/orders/:orderId/status`
+
+Provider updates the status of a booking. Used by the Bookings screen action buttons (Accept, Reject, Mark Charging, Complete).
+
+**Request**
+```json
+{
+  "status": "confirmed"
+}
+```
+
+Valid provider-initiated transitions:
+
+| From | To | Action button |
+|---|---|---|
+| `pending` | `confirmed` | Accept |
+| `pending` | `cancelled` | Reject |
+| `confirmed` | `active` | Mark Charging |
+| `active` | `completed` | Complete |
+
+**Response `200`**
+```json
+{ "id": "ord_xyz9", "status": "confirmed" }
+```
+
+**Error `422`** — invalid transition
+```json
+{
+  "error": "INVALID_STATUS_TRANSITION",
+  "message": "Cannot transition from 'completed' to 'confirmed'."
+}
+```
+
+---
+
+### `POST /api/v1/me/station/blocked-slots`
+
+Block a time window on the provider's calendar (maintenance, personal, etc.). Used by the Block Time modal in the Bookings screen.
+
+**Request**
+```json
+{
+  "startTime": "2026-06-29T10:00:00+07:00",
+  "endTime": "2026-06-29T14:00:00+07:00",
+  "reason": "Maintenance"
+}
+```
+
+`reason` values: `"Busy" | "Maintenance" | "Personal" | "Other"`
+
+**Response `201`**
+```json
+{
+  "id": "blk_001",
+  "startTime": "2026-06-29T10:00:00+07:00",
+  "endTime": "2026-06-29T14:00:00+07:00",
+  "reason": "Maintenance"
+}
+```
+
+**Error `409`** — overlaps an existing confirmed booking
+```json
+{
+  "error": "SLOT_CONFLICT",
+  "message": "The blocked window overlaps with an existing confirmed booking."
+}
+```
+
+---
+
+### `DELETE /api/v1/me/station/blocked-slots/:blockId`
+
+Remove a blocked slot.
+
+**Response `204`** _(no body)_
+
+---
+
+### `GET /api/v1/me/station/analytics`
+
+KPI summary and chart data for the Financial dashboard.
+
+**Query parameters**
+
+| Param | Type | Description |
+|---|---|---|
+| `year` | int | Year for monthly series (default: current year) |
+
+**Response `200`**
+```json
+{
+  "summary": [
+    { "label": "Total Revenue",       "value": "₫4,200,000", "delta": "+12%" },
+    { "label": "Revenue This Month",  "value": "₫840,000",   "delta": "+8%" },
+    { "label": "Pending Payout",      "value": "₫210,000",   "delta": null },
+    { "label": "Completed Sessions",  "value": "23",          "delta": "+3" }
+  ],
+  "revenueSeries": [120000, 180000, 95000, 210000, 175000, 300000, 260000, 400000, 320000, 510000, 480000, 840000],
+  "weeklyRevenue": [95000, 130000, 80000, 160000, 200000, 310000, 260000],
+  "occupancyRevenue": [
+    { "day": "Mon", "occupancy": 60, "revenue": 150000 },
+    { "day": "Tue", "occupancy": 45, "revenue": 110000 },
+    { "day": "Wed", "occupancy": 80, "revenue": 200000 },
+    { "day": "Thu", "occupancy": 55, "revenue": 135000 },
+    { "day": "Fri", "occupancy": 90, "revenue": 225000 },
+    { "day": "Sat", "occupancy": 95, "revenue": 240000 },
+    { "day": "Sun", "occupancy": 70, "revenue": 175000 }
+  ],
+  "transactions": [
+    {
+      "date": "2026-06-27T09:00:00+07:00",
+      "driverName": "Lan Anh Nguyen",
+      "vehicle": "VinFast VF8",
+      "durationHours": 2.0,
+      "amount": 55000,
+      "status": "completed"
+    }
+  ]
+}
+```
+
+---
+
+### `POST /api/v1/me/provider/verify-licence`
+
+Upload business registration document for provider verification. Used by the returning-provider onboarding flow (`/provider-onboarding?returning=true`).
+
+**Request** — `multipart/form-data`
+
+| Field | Type | Description |
+|---|---|---|
+| `file` | file | Image (JPG/PNG) or PDF of the approved business licence |
+
+**Response `200`**
+```json
+{
+  "verified": true,
+  "verifiedAt": "2026-06-28T10:00:00+07:00"
+}
+```
+
+**Response `202`** — file received but manual review required (edge case)
+```json
+{
+  "verified": false,
+  "message": "Document submitted for manual review. You will be notified within 24 hours."
 }
 ```
 
@@ -572,11 +637,13 @@ ConnectorType   = "Type 1" | "Type 2" | "CCS" | "CHAdeMO"
 
 Role            = "driver" | "provider"
 
-OrderStatus     = "pending"     // payment processing
-                | "confirmed"   // payment success, not yet started
-                | "active"      // driver has arrived, charging in progress
+OrderStatus     = "pending"     // awaiting provider acceptance
+                | "confirmed"   // provider accepted
+                | "active"      // driver arrived, charging in progress
                 | "completed"   // session ended
                 | "cancelled"
+
+BlockReason     = "Busy" | "Maintenance" | "Personal" | "Other"
 
 Amenity         = "Coffee" | "WiFi" | "Air Conditioning" | "Restroom"
                 | "Parking" | "Covered" | "Security" | "Snacks"
@@ -595,14 +662,11 @@ All error responses follow this structure:
 }
 ```
 
-Common HTTP status codes:
-
 | Code | Meaning |
 |---|---|
-| `400` | Validation error — malformed request body or missing required fields |
-| `401` | Missing or expired access token |
-| `403` | Authenticated but not authorised (e.g. driver hitting provider-only endpoint) |
+| `400` | Validation error — malformed request or missing required fields |
+| `403` | Not authorised for this action (e.g. driver hitting provider-only endpoint) |
 | `404` | Resource not found |
 | `409` | Conflict (slot taken, duplicate review, etc.) |
-| `422` | Business rule violation (e.g. end time before start time) |
+| `422` | Business rule violation (e.g. invalid status transition, end before start) |
 | `500` | Internal server error |

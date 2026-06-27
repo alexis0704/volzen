@@ -84,6 +84,16 @@ body {
   transform: translateY(-1px);
 }
 
+/* ── Marquee carousel ─────────────────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes marquee-reverse {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
 /* ── Leaflet overrides ────────────────────────────────────── */
 .leaflet-container {
   background: #0a0f0d !important;
