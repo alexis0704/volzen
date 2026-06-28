@@ -231,6 +231,10 @@ public class AdvisorKnowledgeBase {
         if (hasAny(query, "hotel", "onboarding", "partner") && snippet.id().contains("hotel")) {
             score += 8;
         }
+        if (hasAny(query, "host", "hosting", "sign up", "signup", "become", "onboarding")
+                && snippet.id().contains("host-onboarding")) {
+            score += 12;
+        }
         if (hasAny(query, "connector", "ccs", "type") && snippet.id().contains("connector")) {
             score += 8;
         }

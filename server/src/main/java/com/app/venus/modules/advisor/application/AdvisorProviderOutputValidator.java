@@ -18,6 +18,7 @@ import tools.jackson.databind.ObjectMapper;
 public class AdvisorProviderOutputValidator {
     private static final Pattern SOURCE_ID = Pattern.compile("\"sourceIds\"\\s*:\\s*\\[(.*?)]", Pattern.DOTALL);
     private static final Pattern STRING_VALUE = Pattern.compile("\"([^\"]+)\"");
+    private static final Pattern URL = Pattern.compile("https?://[^\\s)\\]\"]+");
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public AdvisorChatResponse validate(
@@ -43,6 +44,7 @@ public class AdvisorProviderOutputValidator {
         if (!allowedSourceIds.containsAll(sourceIds)) {
             throw new IllegalArgumentException("Advisor provider output invented sourceIds.");
         }
+        rejectInventedUrls(answer, retrievedSnippets);
 
         LocalDate dataAsOf = dataAsOf(json, retrievedSnippets);
         return new AdvisorChatResponse(
@@ -54,6 +56,24 @@ public class AdvisorProviderOutputValidator {
                 dataAsOf,
                 provider,
                 json.at("/unsupportedReason").asText(null));
+    }
+
+    private void rejectInventedUrls(String answer, List<AdvisorKnowledgeSnippet> retrievedSnippets) {
+        Set<String> allowedUrls = new HashSet<>();
+        for (AdvisorKnowledgeSnippet snippet : retrievedSnippets) {
+            String url = snippet.source().url();
+            if (url != null && url.startsWith("http")) {
+                allowedUrls.add(url);
+            }
+        }
+
+        Matcher matcher = URL.matcher(answer);
+        while (matcher.find()) {
+            String url = matcher.group();
+            if (!allowedUrls.contains(url)) {
+                throw new IllegalArgumentException("Advisor provider output invented URLs.");
+            }
+        }
     }
 
     private JsonNode parse(String output) {

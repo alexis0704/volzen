@@ -20,11 +20,14 @@ class AdvisorGuardrailPromptBuilderTests {
         assertThat(prompt).contains("Never invent sources");
         assertThat(prompt).contains("Never invent laws, statistics, partner names, permits, approvals, charger availability, profitability, or EV-user counts");
         assertThat(prompt).contains("Return short answers only");
-        assertThat(prompt).contains("structured JSON contract");
+        assertThat(prompt).contains("Return JSON only with this exact shape");
+        assertThat(prompt).contains("\"sourceIds\": [\"SOURCE-ID\"]");
         assertThat(prompt).contains("not legal advice");
         assertThat(prompt).contains("qualified professional review");
         assertThat(prompt).contains("proxy estimates, not verified demand facts");
         assertThat(prompt).contains(AdvisorContract.FALLBACK_ANSWER);
+        assertThat(prompt).contains("<source id=\"VOLZEN-POLICY-001\" claimType=\"internal/pilot\" dataAsOf=\"2026-06-28\">");
+        assertThat(prompt).contains("</source>");
     }
 
     @Test

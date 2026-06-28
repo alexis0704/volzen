@@ -69,6 +69,15 @@ class AdvisorKnowledgeBaseTests {
     }
 
     @Test
+    void retrievesHostOnboardingBoundary() {
+        AdvisorRetrievalResult result = knowledgeBase.retrieve("How do I become a host?", null, 4);
+
+        assertThat(result.supported()).isTrue();
+        assertThat(result.snippets()).extracting(AdvisorKnowledgeSnippet::sourceId)
+                .contains("VOLZEN-POLICY-006");
+    }
+
+    @Test
     void retrievesConnectorRecommendation() {
         AdvisorRetrievalResult result = knowledgeBase.retrieve("Which connector should we recommend?", null, 4);
 

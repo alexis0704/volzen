@@ -27,6 +27,11 @@
   claimType: internal/pilot
   note: If electrical capacity, metering, property approval, charger status, or legal eligibility is unverified, say that operator or professional review is required; do not invent EV population counts and use demand potential based on proxies only.
 
+- id: policy-host-onboarding-mvp
+  sourceId: VOLZEN-POLICY-006
+  claimType: internal/pilot
+  note: For the MVP, a potential host should use the in-app provider onboarding flow, prepare business or property details, describe the charger and site, confirm property permission, and wait for Volzen/manual review before the spot is treated as active. Do not provide public onboarding URLs unless a verified source exists.
+
 ## Sources
 
 - sourceId: VOLZEN-POLICY-001
@@ -55,6 +60,12 @@
 
 - sourceId: VOLZEN-POLICY-005
   title: Volzen MVP unknown-information rule
+  url: internal
+  lastReviewed: 2026-06-28
+  sourceType: internal/pilot
+
+- sourceId: VOLZEN-POLICY-006
+  title: Volzen MVP host onboarding boundary
   url: internal
   lastReviewed: 2026-06-28
   sourceType: internal/pilot

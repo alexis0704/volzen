@@ -7,8 +7,6 @@ import ThemeToggle from "@/components/ThemeToggle";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 
-const SYSTEM_PROMPT = `You are a helpful support assistant for VOLZEN, an EV charging marketplace that connects EV drivers with homeowners who have charging stations. Help users with questions about finding charging spots, booking, payments, becoming a host, and troubleshooting. Be concise and friendly.`;
-
 type Msg = { role: "user" | "assistant"; text: string };
 
 const STARTERS = [
@@ -38,13 +36,13 @@ export default function HelpPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/api/ai`, {
+      const res = await fetch(`${API_BASE}/api/v1/advisor/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: text.trim(), systemPrompt: SYSTEM_PROMPT, mode: "generate_text" }),
+        body: JSON.stringify({ message: text.trim() }),
       });
       const json = await res.json();
-      const reply = json?.data?.text ?? "Sorry, I couldn't get a response. Please try again.";
+      const reply = json?.answer ?? "Sorry, I couldn't get a response. Please try again.";
       setMessages((prev) => [...prev, { role: "assistant", text: reply }]);
     } catch {
       setMessages((prev) => [...prev, { role: "assistant", text: "Connection error. Please check that the server is running." }]);

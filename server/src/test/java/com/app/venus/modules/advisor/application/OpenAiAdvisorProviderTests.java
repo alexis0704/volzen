@@ -64,6 +64,20 @@ class OpenAiAdvisorProviderTests {
     }
 
     @Test
+    void inventedHostUrlsReturnSafeFallback() {
+        FakeAdvisorModelClient client = new FakeAdvisorModelClient("""
+                {"answer":"Become a host at https://www.volzen.com/hosts.","sourceIds":["VOLZEN-POLICY-006"],"grounded":true,"needsProfessionalReview":false,"dataAsOf":"2026-06-28","provider":"openai","unsupportedReason":null}
+                """);
+        OpenAiAdvisorProvider provider = provider(client);
+
+        var response = provider.chat(new AdvisorChatRequest("How do I become a host?", null, null, null));
+
+        assertThat(response.grounded()).isFalse();
+        assertThat(response.answer()).isEqualTo(AdvisorContract.FALLBACK_ANSWER);
+        assertThat(client.calls).isEqualTo(2);
+    }
+
+    @Test
     void unsupportedQuestionDoesNotCallProvider() {
         FakeAdvisorModelClient client = new FakeAdvisorModelClient("""
                 {"answer":"unused","sourceIds":[],"grounded":false,"needsProfessionalReview":false,"dataAsOf":"2026-06-28","provider":"openai","unsupportedReason":"unused"}
