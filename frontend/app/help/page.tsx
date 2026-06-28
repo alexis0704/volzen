@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { Send, ArrowLeft, Bot, User } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 type Msg = { role: "user" | "assistant"; text: string };
 
