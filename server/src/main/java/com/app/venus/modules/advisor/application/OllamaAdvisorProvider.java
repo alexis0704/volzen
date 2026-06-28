@@ -74,7 +74,10 @@ public class OllamaAdvisorProvider implements AdvisorChatProvider {
                     retrieval.snippets(),
                     AdvisorProvider.OLLAMA);
         } catch (RuntimeException secondFailure) {
-            return fallbackResponse(retrieval.snippets(), AdvisorContract.FALLBACK_ANSWER);
+            return AdvisorGroundedFallbackComposer.compose(
+                    retrieval.snippets(),
+                    AdvisorProvider.OLLAMA,
+                    AdvisorContract.FALLBACK_ANSWER);
         }
     }
 

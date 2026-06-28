@@ -78,6 +78,15 @@ class AdvisorKnowledgeBaseTests {
     }
 
     @Test
+    void retrievesPaymentBoundary() {
+        AdvisorRetrievalResult result = knowledgeBase.retrieve("What payment methods are accepted?", null, 4);
+
+        assertThat(result.supported()).isTrue();
+        assertThat(result.snippets()).extracting(AdvisorKnowledgeSnippet::sourceId)
+                .contains("VOLZEN-POLICY-007");
+    }
+
+    @Test
     void retrievesConnectorRecommendation() {
         AdvisorRetrievalResult result = knowledgeBase.retrieve("Which connector should we recommend?", null, 4);
 

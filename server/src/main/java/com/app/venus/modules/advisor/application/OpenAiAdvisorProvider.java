@@ -81,7 +81,10 @@ public class OpenAiAdvisorProvider implements AdvisorChatProvider {
                     retrieval.snippets(),
                     AdvisorProvider.OPENAI);
         } catch (RuntimeException secondFailure) {
-            return fallbackResponse(retrieval.snippets(), AdvisorContract.FALLBACK_ANSWER);
+            return AdvisorGroundedFallbackComposer.compose(
+                    retrieval.snippets(),
+                    AdvisorProvider.OPENAI,
+                    AdvisorContract.FALLBACK_ANSWER);
         }
     }
 

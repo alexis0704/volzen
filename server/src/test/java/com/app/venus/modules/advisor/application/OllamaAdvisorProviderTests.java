@@ -54,8 +54,9 @@ class OllamaAdvisorProviderTests {
         var response = provider(client).chat(new AdvisorChatRequest("How should hotel onboarding work?", null, null, null));
 
         assertThat(response.provider()).isEqualTo(AdvisorProvider.OLLAMA);
-        assertThat(response.grounded()).isFalse();
-        assertThat(response.answer()).isEqualTo(AdvisorContract.FALLBACK_ANSWER);
+        assertThat(response.grounded()).isTrue();
+        assertThat(response.answer()).contains("use the in-app provider onboarding flow");
+        assertThat(response.sourceIds()).contains("VOLZEN-PILOT-002");
         assertThat(client.calls).isEqualTo(2);
     }
 

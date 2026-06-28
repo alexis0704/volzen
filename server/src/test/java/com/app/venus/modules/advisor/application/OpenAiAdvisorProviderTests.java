@@ -57,8 +57,9 @@ class OpenAiAdvisorProviderTests {
 
         var response = provider.chat(new AdvisorChatRequest("Which connector should we recommend?", null, null, null));
 
-        assertThat(response.grounded()).isFalse();
-        assertThat(response.answer()).isEqualTo(AdvisorContract.FALLBACK_ANSWER);
+        assertThat(response.grounded()).isTrue();
+        assertThat(response.answer()).contains("Connector choice should be based on the vehicles");
+        assertThat(response.sourceIds()).contains("VOLZEN-PILOT-003");
         assertThat(response.unsupportedReason()).isEqualTo(AdvisorContract.FALLBACK_ANSWER);
         assertThat(client.calls).isEqualTo(2);
     }
@@ -72,9 +73,53 @@ class OpenAiAdvisorProviderTests {
 
         var response = provider.chat(new AdvisorChatRequest("How do I become a host?", null, null, null));
 
-        assertThat(response.grounded()).isFalse();
-        assertThat(response.answer()).isEqualTo(AdvisorContract.FALLBACK_ANSWER);
+        assertThat(response.grounded()).isTrue();
+        assertThat(response.answer()).contains("use the in-app provider onboarding flow");
+        assertThat(response.answer()).doesNotContain("https://www.volzen.com/hosts");
+        assertThat(response.sourceIds()).contains("VOLZEN-POLICY-006");
         assertThat(client.calls).isEqualTo(2);
+    }
+
+    @Test
+    void invalidLegalModelOutputFallsBackToGroundedKnowledge() {
+        FakeAdvisorModelClient client = new FakeAdvisorModelClient("not json");
+        OpenAiAdvisorProvider provider = provider(client);
+
+        var response = provider.chat(new AdvisorChatRequest("Is selling electricity illegal in Vietnam?", null, null, null));
+
+        assertThat(response.grounded()).isTrue();
+        assertThat(response.answer()).contains("I cannot say selling electricity is illegal as legal advice");
+        assertThat(response.answer()).contains("retail electricity pricing is regulated in Vietnam");
+        assertThat(response.sourceIds()).contains("LAW-01");
+        assertThat(response.needsProfessionalReview()).isTrue();
+        assertThat(client.calls).isEqualTo(2);
+    }
+
+    @Test
+    void invalidLocationModelOutputFallsBackToReadableDemandAnswer() {
+        FakeAdvisorModelClient client = new FakeAdvisorModelClient("not json");
+        OpenAiAdvisorProvider provider = provider(client);
+
+        var response = provider.chat(new AdvisorChatRequest("Does Vung Tau have high demand for renting EVs?", null, null, null));
+
+        assertThat(response.grounded()).isTrue();
+        assertThat(response.answer()).contains("Vung Tau");
+        assertThat(response.answer()).contains("proxy signal");
+        assertThat(response.answer()).doesNotContain("Ho Chi Minh City District 1");
+        assertThat(response.sourceIds()).contains("VOLZEN-LOCATION-SIGNALS-001");
+    }
+
+    @Test
+    void invalidPaymentModelOutputFallsBackToReadablePaymentAnswer() {
+        FakeAdvisorModelClient client = new FakeAdvisorModelClient("not json");
+        OpenAiAdvisorProvider provider = provider(client);
+
+        var response = provider.chat(new AdvisorChatRequest("What payment methods are accepted?", null, null, null));
+
+        assertThat(response.grounded()).isTrue();
+        assertThat(response.answer()).contains("real payments are not connected yet");
+        assertThat(response.answer()).contains("accepted payment methods are not verified");
+        assertThat(response.sourceIds()).contains("VOLZEN-POLICY-007");
     }
 
     @Test

@@ -235,6 +235,10 @@ public class AdvisorKnowledgeBase {
                 && snippet.id().contains("host-onboarding")) {
             score += 12;
         }
+        if (hasAny(query, "payment", "pay", "card", "wallet", "momo", "method")
+                && snippet.id().contains("payment-methods")) {
+            score += 12;
+        }
         if (hasAny(query, "connector", "ccs", "type") && snippet.id().contains("connector")) {
             score += 8;
         }

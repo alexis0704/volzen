@@ -32,6 +32,11 @@
   claimType: internal/pilot
   note: For the MVP, a potential host should use the in-app provider onboarding flow, prepare business or property details, describe the charger and site, confirm property permission, and wait for Volzen/manual review before the spot is treated as active. Do not provide public onboarding URLs unless a verified source exists.
 
+- id: policy-payment-methods-mvp
+  sourceId: VOLZEN-POLICY-007
+  claimType: internal/pilot
+  note: For the MVP demo, payment handling is not connected to a live payment processor yet. The product may show booking totals and payment-related UI, but accepted real payment methods are not verified until a payment provider integration is added.
+
 ## Sources
 
 - sourceId: VOLZEN-POLICY-001
@@ -66,6 +71,12 @@
 
 - sourceId: VOLZEN-POLICY-006
   title: Volzen MVP host onboarding boundary
+  url: internal
+  lastReviewed: 2026-06-28
+  sourceType: internal/pilot
+
+- sourceId: VOLZEN-POLICY-007
+  title: Volzen MVP payment boundary
   url: internal
   lastReviewed: 2026-06-28
   sourceType: internal/pilot
