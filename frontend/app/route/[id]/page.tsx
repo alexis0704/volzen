@@ -120,7 +120,8 @@ export default function RoutePage() {
       </div>
 
       {/* Bottom info sheet */}
-      <div className="px-5 pt-5 pb-6" style={{ background: "var(--bg)", borderTop: "1px solid var(--glass-border)" }}>
+      <div className="flex justify-center px-5 pt-5 pb-6" style={{ background: "var(--bg)", borderTop: "1px solid var(--glass-border)" }}>
+        <div className="w-full max-w-lg">
         <div className="flex items-center gap-3 mb-4">
           <img src={p.avatar} alt={p.name} className="w-10 h-10 rounded-full object-cover border-2" style={{ borderColor: "color-mix(in srgb, var(--accent) 40%, transparent)" }} />
           <div>
@@ -150,6 +151,7 @@ export default function RoutePage() {
             I&apos;ve arrived
           </button>
         )}
+      </div>
       </div>
     </div>
   );

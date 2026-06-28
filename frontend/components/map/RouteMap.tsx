@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 
 interface Props {
@@ -48,7 +48,11 @@ export default function RouteMap({ origin, destination, onRouteInfo }: Props) {
         return;
       }
 
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      const isDark = document.documentElement.getAttribute("data-theme") !== "light";
+      const tileUrl = isDark
+        ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+      L.tileLayer(tileUrl, {
         attribution: '© OpenStreetMap © CartoDB',
         subdomains: "abcd",
         maxZoom: 19,

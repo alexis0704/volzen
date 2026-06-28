@@ -22,7 +22,7 @@ export default function AuthLayout({
 }: AuthLayoutProps) {
   return (
     <div className="min-h-dvh flex flex-col lg:flex-row" style={{ background: "var(--bg)" }}>
-      {/* Brand panel — desktop */}
+      {/* Brand panel — desktop (always-dark, unaffected by light/dark theme) */}
       <aside
         className="hidden lg:flex lg:w-[44%] relative flex-col justify-between p-12 overflow-hidden select-none"
         style={{ background: "linear-gradient(160deg, #060a08 0%, #0c1f16 40%, #060a08 100%)" }}
@@ -53,7 +53,7 @@ export default function AuthLayout({
         {/* Top — logo */}
         <div className="relative z-10">
           <Link href="/" className="inline-flex items-center gap-2 group">
-            <span className="text-lg font-bold tracking-tight" style={{ color: "var(--text)" }}>
+            <span className="text-lg font-bold tracking-tight" style={{ color: "#f5f5f5" }}>
               VOLZEN
             </span>
           </Link>
@@ -63,16 +63,16 @@ export default function AuthLayout({
         <div className="relative z-10 pb-16">
           <p
             className="text-[13px] font-medium uppercase tracking-[0.15em] mb-4"
-            style={{ color: "color-mix(in srgb, var(--accent) 60%, transparent)" }}
+            style={{ color: "rgba(74,222,128,0.6)" }}
           >
             EV Charging Network
           </p>
-          <h2 className="text-3xl font-bold leading-[1.15] mb-4" style={{ color: "var(--text)" }}>
+          <h2 className="text-3xl font-bold leading-[1.15] mb-4" style={{ color: "#ffffff" }}>
             Power up,
             <br />
-            <span style={{ color: "var(--accent)" }}>anywhere you park.</span>
+            <span style={{ color: "#4ade80" }}>anywhere you park.</span>
           </h2>
-          <p className="text-sm leading-relaxed max-w-xs" style={{ color: "var(--text-muted)" }}>
+          <p className="text-sm leading-relaxed max-w-xs" style={{ color: "#a3a3a3" }}>
             Volzen connects EV drivers with homeowners across Vietnam. Find a spot, book in seconds, charge.
           </p>
         </div>
@@ -80,7 +80,7 @@ export default function AuthLayout({
         {/* Bottom — copyright */}
         <div
           className="relative z-10 text-[11px]"
-          style={{ color: "color-mix(in srgb, var(--text-muted) 40%, transparent)" }}
+          style={{ color: "rgba(163,163,163,0.4)" }}
         >
           &copy; 2026 Volzen
         </div>

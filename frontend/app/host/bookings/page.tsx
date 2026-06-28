@@ -57,7 +57,7 @@ export default function BookingsPage() {
         {/* Header */}
         <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
-            <p className="text-sm font-semibold" style={{ color: "#e2e8f0" }}>Booking Calendar</p>
+            <p className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>Booking Calendar</p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-4xl" style={{ color: "var(--text)" }}>Schedule management</h1>
             <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-muted)" }}>Manage reservations, station availability, and demand patterns.</p>
           </div>
@@ -72,7 +72,7 @@ export default function BookingsPage() {
               defaultValue="2026-06-28" />
             <button type="button" onClick={() => setShowBlockModal(true)}
               className="h-11 rounded-lg px-5 text-sm font-bold transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
-              style={{ background: "#e2e8f0", color: "#0a0f0d" }}>
+              style={{ background: "var(--accent)", color: "var(--accent-fg)" }}>
               Block Time
             </button>
           </div>
@@ -80,7 +80,7 @@ export default function BookingsPage() {
 
         {/* Notice */}
         <div className="rounded-lg px-4 py-3 text-sm font-semibold"
-          style={{ background: "rgba(226,232,240,0.08)", border: "1px solid rgba(226,232,240,0.2)", color: "#e2e8f0" }}>
+          style={{ background: "color-mix(in srgb, var(--text-muted) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--text-muted) 20%, transparent)", color: "var(--text-muted)" }}>
           {notice}
         </div>
 
@@ -188,7 +188,7 @@ export default function BookingsPage() {
                 className="sticky top-24 min-w-0 rounded-[28px] p-5 shadow-2xl"
                 style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", backdropFilter: "blur(14px)" }}
               >
-                <p className="text-sm font-semibold" style={{ color: "#e2e8f0" }}>Booking Details</p>
+                <p className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>Booking Details</p>
                 <h2 className="mt-2 text-xl font-bold" style={{ color: "var(--text)" }}>Select a time slot</h2>
                 <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-muted)" }}>Click any booked, charging, or blocked slot to manage the reservation.</p>
               </div>
@@ -214,7 +214,7 @@ export default function BookingsPage() {
               style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", backdropFilter: "blur(14px)" }}>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold" style={{ color: "#e2e8f0" }}>Block Time</p>
+                  <p className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>Block Time</p>
                   <h2 className="mt-1 text-xl font-bold" style={{ color: "var(--text)" }}>Create unavailable slot</h2>
                 </div>
                 <button type="button" onClick={() => setShowBlockModal(false)}
@@ -246,7 +246,7 @@ export default function BookingsPage() {
                 </select>
                 <button type="button" onClick={saveBlockTime}
                   className="h-12 rounded-lg text-sm font-bold transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
-                  style={{ background: "#e2e8f0", color: "#0a0f0d" }}>
+                  style={{ background: "var(--accent)", color: "var(--accent-fg)" }}>
                   Save
                 </button>
               </div>
@@ -276,7 +276,7 @@ function BookingPanel({
         style={{ background: "color-mix(in srgb, var(--text-muted) 20%, transparent)" }} />
       <div className="mb-5 flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold" style={{ color: "#e2e8f0" }}>Booking Details</p>
+          <p className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>Booking Details</p>
           <h2 className="mt-1 text-xl font-bold" style={{ color: "var(--text)" }}>{booking.title}</h2>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -319,18 +319,18 @@ function TimelineCard({
   horizontal?: boolean;
 }) {
   const stateColors: Record<string, { bg: string; text: string; border: string }> = {
-    Available:  { bg: "rgba(148,163,184,0.08)", text: "#94a3b8",  border: "rgba(148,163,184,0.2)"  },
-    Booked:     { bg: "rgba(226,232,240,0.1)",  text: "#e2e8f0",  border: "rgba(226,232,240,0.25)" },
-    Blocked:    { bg: "rgba(148,163,184,0.08)", text: "#94a3b8",  border: "rgba(148,163,184,0.2)"  },
-    Charging:   { bg: "rgba(251,146,60,0.1)",   text: "#fb923c",  border: "rgba(251,146,60,0.25)"  },
-    Completed:  { bg: "rgba(148,163,184,0.06)", text: "#94a3b8",  border: "rgba(148,163,184,0.15)" },
-    Pending:    { bg: "rgba(234,179,8,0.1)",    text: "#eab308",  border: "rgba(234,179,8,0.25)"   },
-    Cancelled:  { bg: "rgba(239,68,68,0.08)",   text: "#ef4444",  border: "rgba(239,68,68,0.2)"    },
-    "No-show":  { bg: "rgba(168,85,247,0.08)",  text: "#a855f7",  border: "rgba(168,85,247,0.2)"   },
+    Available:  { bg: "color-mix(in srgb, var(--text-muted) 10%, transparent)", text: "var(--text-muted)",  border: "color-mix(in srgb, var(--text-muted) 25%, transparent)"  },
+    Booked:     { bg: "color-mix(in srgb, var(--text) 12%, transparent)",      text: "var(--text)",        border: "color-mix(in srgb, var(--text) 30%, transparent)"      },
+    Blocked:    { bg: "color-mix(in srgb, var(--text-muted) 10%, transparent)", text: "var(--text-muted)",  border: "color-mix(in srgb, var(--text-muted) 25%, transparent)"  },
+    Charging:   { bg: "rgba(251,146,60,0.1)",                                   text: "#fb923c",            border: "rgba(251,146,60,0.25)"                                  },
+    Completed:  { bg: "color-mix(in srgb, var(--text-muted) 8%, transparent)",  text: "var(--text-muted)",  border: "color-mix(in srgb, var(--text-muted) 20%, transparent)" },
+    Pending:    { bg: "rgba(234,179,8,0.1)",                                    text: "#eab308",            border: "rgba(234,179,8,0.25)"                                   },
+    Cancelled:  { bg: "rgba(239,68,68,0.08)",                                   text: "#ef4444",            border: "rgba(239,68,68,0.2)"                                    },
+    "No-show":  { bg: "rgba(168,85,247,0.08)",                                  text: "#a855f7",            border: "rgba(168,85,247,0.2)"                                   },
   };
   const colors = slot
-    ? (stateColors[slot.state] ?? { bg: "rgba(148,163,184,0.08)", text: "#94a3b8", border: "rgba(148,163,184,0.15)" })
-    : { bg: "rgba(148,163,184,0.04)", text: "var(--text-muted)", border: "rgba(148,163,184,0.1)" };
+    ? (stateColors[slot.state] ?? { bg: "color-mix(in srgb, var(--text-muted) 10%, transparent)", text: "var(--text-muted)", border: "color-mix(in srgb, var(--text-muted) 20%, transparent)" })
+    : { bg: "color-mix(in srgb, var(--text-muted) 5%, transparent)", text: "var(--text-muted)", border: "color-mix(in srgb, var(--text-muted) 12%, transparent)" };
 
   if (horizontal) {
     return (
@@ -389,7 +389,7 @@ function DetailBox({ icon: Icon, label, value }: { icon: ElementType; label: str
   return (
     <div className="rounded-lg p-3"
       style={{ background: "color-mix(in srgb, var(--glass-bg) 60%, transparent)" }}>
-      <Icon size={15} style={{ color: "#94a3b8" }} />
+      <Icon size={15} style={{ color: "var(--text-muted)" }} />
       <p className="mt-2 text-xs" style={{ color: "var(--text-muted)" }}>{label}</p>
       <p className="mt-0.5 truncate font-bold" style={{ color: "var(--text)" }}>{value}</p>
     </div>

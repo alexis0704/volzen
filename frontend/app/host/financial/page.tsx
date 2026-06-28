@@ -52,7 +52,7 @@ export default function FinancialDashboardPage() {
         {/* Header */}
         <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
-            <p className="text-sm font-semibold" style={{ color: "#e2e8f0" }}>Financial Dashboard</p>
+            <p className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>Financial Dashboard</p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-4xl" style={{ color: "var(--text)" }}>Earnings overview</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6" style={{ color: "var(--text-muted)" }}>Monitor revenue, payouts, and charging business trends.</p>
           </div>
@@ -65,8 +65,8 @@ export default function FinancialDashboardPage() {
                 onClick={() => { setActiveFilter(filter); setNotice(`Revenue analytics updated for ${filter.toLowerCase()}.`); }}
                 className="h-9 rounded-xl px-1 text-[11px] font-semibold transition-all duration-200 active:scale-95 sm:h-11 sm:rounded-full sm:px-4 sm:text-sm"
                 style={{
-                  background: activeFilter === filter ? "#e2e8f0" : "transparent",
-                  color: activeFilter === filter ? "#0a0f0d" : "var(--text-muted)",
+                  background: activeFilter === filter ? "var(--accent)" : "transparent",
+                  color: activeFilter === filter ? "var(--accent-fg)" : "var(--text-muted)",
                 }}
               >
                 <span className="sm:hidden">{filter.replace("This ", "").replace("Today", "Day")}</span>
@@ -78,7 +78,7 @@ export default function FinancialDashboardPage() {
 
         {/* Notice */}
         <div className="rounded-lg px-4 py-3 text-sm font-semibold"
-          style={{ background: "rgba(226,232,240,0.08)", border: "1px solid rgba(226,232,240,0.2)", color: "#e2e8f0" }}>
+          style={{ background: "color-mix(in srgb, var(--text-muted) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--text-muted) 20%, transparent)", color: "var(--text-muted)" }}>
           {notice}
         </div>
 
@@ -221,7 +221,7 @@ export default function FinancialDashboardPage() {
           </ProviderCard>
 
           <ProviderCard>
-            <Wallet size={20} style={{ color: "#94a3b8" }} />
+            <Wallet size={20} style={{ color: "var(--text-muted)" }} />
             <h2 className="mt-4 font-bold" style={{ color: "var(--text)" }}>Payout</h2>
             <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>Available Balance</p>
             <p className="mt-3 text-4xl font-bold" style={{ color: "var(--text)" }}>₫7.2M</p>
@@ -233,7 +233,7 @@ export default function FinancialDashboardPage() {
               type="button"
               onClick={handleWithdraw}
               className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-lg font-bold transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
-              style={{ background: "#e2e8f0", color: "#0a0f0d" }}
+              style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
             >
               <ArrowDownToLine size={18} /> Withdraw
             </button>
@@ -284,7 +284,7 @@ export default function FinancialDashboardPage() {
               style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", backdropFilter: "blur(14px)" }}>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold" style={{ color: "#e2e8f0" }}>Transaction selected</p>
+                  <p className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>Transaction selected</p>
                   <h3 className="mt-1 text-lg font-bold" style={{ color: "var(--text)" }}>{selectedTx.driver}</h3>
                 </div>
                 <button type="button" onClick={() => setSelectedTx(null)}

@@ -117,15 +117,15 @@ body {
 
 /* ── Leaflet overrides ────────────────────────────────────── */
 .leaflet-container {
-  background: #0a0f0d !important;
+  background: var(--bg) !important;
   font-family: inherit !important;
 }
 .leaflet-control-zoom a {
-  background: rgba(10, 15, 13, 0.9) !important;
-  color: var(--accent) !important;
+  background: color-mix(in srgb, var(--bg) 85%, transparent) !important;
+  color: var(--text-muted) !important;
   border-color: var(--glass-border) !important;
 }
 .leaflet-control-attribution {
-  background: rgba(10, 15, 13, 0.7) !important;
+  background: color-mix(in srgb, var(--bg) 75%, transparent) !important;
   color: var(--text-muted) !important;
 }

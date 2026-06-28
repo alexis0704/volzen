@@ -230,20 +230,20 @@ export default function SpotsPage() {
         {/* Header */}
         <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
-            <p className="text-sm font-semibold" style={{ color: "#e2e8f0" }}>My Charging Spots</p>
+            <p className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>My Charging Spots</p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-4xl" style={{ color: "var(--text)" }}>Station management</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6" style={{ color: "var(--text-muted)" }}>Create, edit, activate, and monitor every charger listed on Volzen.</p>
           </div>
           <button type="button" onClick={addNewSpot}
             className="flex h-12 w-full items-center justify-center gap-2 rounded-lg px-5 text-sm font-bold transition-all duration-200 hover:opacity-90 active:scale-[0.98] sm:w-auto"
-            style={{ background: "#e2e8f0", color: "#0a0f0d" }}>
+            style={{ background: "var(--accent)", color: "var(--accent-fg)" }}>
             <Plus size={18} /> Add New Charging Spot
           </button>
         </div>
 
         {/* Notice */}
         <div className="rounded-lg px-4 py-3 text-sm font-semibold"
-          style={{ background: "rgba(226,232,240,0.08)", border: "1px solid rgba(226,232,240,0.2)", color: "#e2e8f0" }}>
+          style={{ background: "color-mix(in srgb, var(--text-muted) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--text-muted) 20%, transparent)", color: "var(--text-muted)" }}>
           {notice}
         </div>
 
@@ -255,7 +255,7 @@ export default function SpotsPage() {
           </ProviderCard>
           <ProviderCard>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>Active</p>
-            <p className="mt-2 text-2xl font-bold" style={{ color: "#e2e8f0" }}>{activeCount}</p>
+            <p className="mt-2 text-2xl font-bold" style={{ color: "var(--text)" }}>{activeCount}</p>
           </ProviderCard>
           <ProviderCard>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>Total Sessions</p>
@@ -267,7 +267,7 @@ export default function SpotsPage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {spots.map((spot, index) => (
             <ProviderCard key={`${spot.name}-${index}`} className="overflow-hidden p-0">
-              <div className="h-1.5 w-full" style={{ background: spot.status === "Active" ? "#e2e8f0" : "#94a3b8" }} />
+              <div className="h-1.5 w-full" style={{ background: spot.status === "Active" ? "var(--accent)" : "var(--text-muted)" }} />
               <button type="button" onClick={() => setSelectedIndex(index)} className="block w-full text-left">
                 <img src={spot.image} alt={spot.name} className="h-40 w-full object-cover" onError={(e) => { e.currentTarget.src = "/stations/pvd-p1-1.svg"; e.currentTarget.style.objectFit = "cover"; }} />
                 <div className="p-4">
@@ -337,7 +337,7 @@ export default function SpotsPage() {
                 return (
                   <div key={item.label} className="flex min-h-12 items-center gap-2 rounded-lg px-3 text-sm font-semibold"
                     style={{ background: "color-mix(in srgb, var(--glass-bg) 60%, transparent)" }}>
-                    <Icon size={16} style={{ color: "#94a3b8" }} />
+                    <Icon size={16} style={{ color: "var(--text-muted)" }} />
                     {item.label}
                   </div>
                 );
@@ -371,7 +371,7 @@ export default function SpotsPage() {
                     onChange={(e) => setSpotForm((current) => current && { ...current, image: e.target.value })} />
                   <button type="button" onClick={() => setUploaded(true)}
                     className="h-12 rounded-lg text-sm font-bold transition-all duration-200 hover:opacity-80"
-                    style={{ border: "2px dashed rgba(226,232,240,0.4)", background: "rgba(226,232,240,0.08)", color: "#e2e8f0" }}>
+                    style={{ border: "2px dashed color-mix(in srgb, var(--text-muted) 40%, transparent)", background: "color-mix(in srgb, var(--text-muted) 8%, transparent)", color: "var(--text-muted)" }}>
                     {uploaded ? "Images Uploaded" : "Upload Images"}
                   </button>
                 </div>
@@ -427,12 +427,12 @@ export default function SpotsPage() {
                 <div className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2">
                   <button type="button" onClick={() => setSpotForm((current) => current && { ...current, chargerType: "Fast Charging" })}
                     className={`h-12 rounded-lg text-sm font-bold transition-all duration-200 ${spotForm.chargerType === "Fast Charging" ? "" : "opacity-60"}`}
-                    style={{ background: spotForm.chargerType === "Fast Charging" ? "#e2e8f0" : "var(--glass-bg)", color: spotForm.chargerType === "Fast Charging" ? "#0a0f0d" : "var(--text-muted)" }}>
+                    style={{ background: spotForm.chargerType === "Fast Charging" ? "var(--accent)" : "var(--glass-bg)", color: spotForm.chargerType === "Fast Charging" ? "var(--accent-fg)" : "var(--text-muted)" }}>
                     Fast Charging
                   </button>
                   <button type="button" onClick={() => setSpotForm((current) => current && { ...current, chargerType: "Slow Charging" })}
                     className={`h-12 rounded-lg text-sm font-bold transition-all duration-200 ${spotForm.chargerType === "Slow Charging" ? "" : "opacity-60"}`}
-                    style={{ background: spotForm.chargerType === "Slow Charging" ? "#e2e8f0" : "var(--glass-bg)", color: spotForm.chargerType === "Slow Charging" ? "#0a0f0d" : "var(--text-muted)" }}>
+                    style={{ background: spotForm.chargerType === "Slow Charging" ? "var(--accent)" : "var(--glass-bg)", color: spotForm.chargerType === "Slow Charging" ? "var(--accent-fg)" : "var(--text-muted)" }}>
                     Slow Charging
                   </button>
                   <label className="grid gap-1">
@@ -468,7 +468,7 @@ export default function SpotsPage() {
                             return { ...current, amenities: nextAmenities };
                           })}
                           className="accent-slate-300" />
-                        <Icon size={16} style={{ color: "#94a3b8" }} />
+                        <Icon size={16} style={{ color: "var(--text-muted)" }} />
                         {item.label}
                       </label>
                     );
@@ -483,15 +483,15 @@ export default function SpotsPage() {
                 </div>
                 <button type="button" onClick={() => setSpotForm((current) => current && { ...current, isActive: !current.isActive })}
                   className={`h-8 w-14 rounded-lg p-1 transition ${spotForm.isActive ? "" : "opacity-40"}`}
-                  style={{ background: spotForm.isActive ? "#e2e8f0" : "var(--glass-bg)" }}
+                  style={{ background: spotForm.isActive ? "var(--accent)" : "var(--glass-bg)" }}
                   aria-pressed={spotForm.isActive}>
                   <span className={`block size-6 rounded-md shadow-sm transition ${spotForm.isActive ? "translate-x-6" : "translate-x-0"}`}
-                    style={{ background: "#0a0f0d" }} />
+                    style={{ background: "var(--accent-fg)" }} />
                 </button>
               </div>
               <button type="button" onClick={saveStation} disabled={saving}
                 className="h-12 w-full rounded-lg text-sm font-bold transition-all duration-200 hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
-                style={{ background: "#e2e8f0", color: "#0a0f0d" }}>
+                style={{ background: "var(--accent)", color: "var(--accent-fg)" }}>
                 {saving ? "Saving..." : "Save Station"}
               </button>
             </div>
@@ -510,7 +510,7 @@ function SpotModal({ title, children, onClose }: { title: string; children: Reac
         style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", backdropFilter: "blur(14px)" }}>
         <div className="mb-5 flex items-start justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold" style={{ color: "#e2e8f0" }}>Charging Spot</p>
+            <p className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>Charging Spot</p>
             <h2 className="mt-1 text-xl font-bold" style={{ color: "var(--text)" }}>{title}</h2>
           </div>
           <button type="button" onClick={onClose}
@@ -640,7 +640,7 @@ function StationLocationPicker({
 function Metric({ icon: Icon, label, value }: { icon: ElementType; label: string; value: string }) {
   return (
     <div className="rounded-lg p-3" style={{ background: "color-mix(in srgb, var(--glass-bg) 60%, transparent)" }}>
-      <Icon size={15} style={{ color: "#94a3b8" }} />
+      <Icon size={15} style={{ color: "var(--text-muted)" }} />
       <p className="mt-2 text-[11px]" style={{ color: "var(--text-muted)" }}>{label}</p>
       <p className="mt-1 truncate text-xs font-bold sm:text-sm" style={{ color: "var(--text)" }}>{value}</p>
     </div>
