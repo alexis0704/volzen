@@ -13,7 +13,13 @@ import com.app.venus.shared.domain.ConnectorType;
 public interface StationRepository extends JpaRepository<Station, String> {
     Optional<Station> findByIdAndAvailableTrue(String id);
 
+    Optional<Station> findByProviderId(String providerId);
+
     Optional<Station> findFirstByProviderIdOrderByIdAsc(String providerId);
+
+    Optional<Station> findByIdAndProviderId(String id, String providerId);
+
+    List<Station> findByProviderIdOrderByIdAsc(String providerId);
 
     List<Station> findByAvailableTrue();
 

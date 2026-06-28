@@ -42,6 +42,14 @@ public class HostStationService {
     }
 
     @Transactional(readOnly = true)
+    public List<HostStationResponse> listCurrentProviderStationResponses() {
+        return stationRepository.findByProviderIdOrderByIdAsc(currentUserService.currentProviderId())
+                .stream()
+                .map(HostStationResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public Station getCurrentProviderStation() {
         return stationRepository.findFirstByProviderIdOrderByIdAsc(currentUserService.currentProviderId())
                 .orElseThrow(() -> new NotFoundException("Station not found."));
@@ -83,6 +91,28 @@ public class HostStationService {
 
         station = stationRepository.saveAndFlush(station);
         return HostStationResponse.from(station);
+    }
+
+    @Transactional
+    public HostStationResponse createCurrentProviderStationResponse(HostStationRequest request) {
+        User provider = currentUserService.currentProvider();
+        Station station = buildStation(publicIdGenerator.nextId("pvd"), provider, request);
+        return HostStationResponse.from(stationRepository.saveAndFlush(station));
+    }
+
+    @Transactional
+    public HostStationResponse updateCurrentProviderStationResponse(String stationId, HostStationRequest request) {
+        Station station = stationRepository.findByIdAndProviderId(stationId, currentUserService.currentProviderId())
+                .orElseThrow(() -> new NotFoundException("Station not found."));
+        applyUpdate(station, request);
+        return HostStationResponse.from(stationRepository.saveAndFlush(station));
+    }
+
+    @Transactional
+    public void deleteCurrentProviderStation(String stationId) {
+        Station station = stationRepository.findByIdAndProviderId(stationId, currentUserService.currentProviderId())
+                .orElseThrow(() -> new NotFoundException("Station not found."));
+        stationRepository.delete(station);
     }
 
     @Transactional
@@ -146,5 +176,43 @@ public class HostStationService {
             }
         }
         return amenities;
+    }
+
+    private Station buildStation(String id, User provider, HostStationRequest request) {
+        Set<ConnectorType> connectorTypes = parseConnectorTypes(request.connectorTypes());
+        Set<Amenity> amenities = parseAmenities(request.amenities());
+        List<String> photoUrls = request.photoUrls() == null ? List.of() : request.photoUrls();
+        boolean available = request.isAvailable() == null || request.isAvailable();
+
+        return new Station(
+                id,
+                provider,
+                request.name(),
+                request.address(),
+                request.lat(),
+                request.lng(),
+                request.pricePerHour(),
+                connectorTypes,
+                amenities,
+                photoUrls,
+                available);
+    }
+
+    private void applyUpdate(Station station, HostStationRequest request) {
+        Set<ConnectorType> connectorTypes = parseConnectorTypes(request.connectorTypes());
+        Set<Amenity> amenities = parseAmenities(request.amenities());
+        List<String> photoUrls = request.photoUrls() == null ? List.of() : request.photoUrls();
+        boolean available = request.isAvailable() == null || request.isAvailable();
+
+        station.update(
+                request.name(),
+                request.address(),
+                request.lat(),
+                request.lng(),
+                request.pricePerHour(),
+                connectorTypes,
+                amenities,
+                photoUrls,
+                available);
     }
 }
